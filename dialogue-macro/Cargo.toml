@@ -1,0 +1,28 @@
+[package]
+name = "dialogue-macro"
+version = "0.1.0"
+edition = "2021"
+autotests = false
+authors = ["yexiyue"]
+keywords = ["rust", "startup", "cli"]
+description = "dialoguer derive macro"
+license = "MIT"
+
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+proc-macro2 = "1.0.69"
+quote = "1.0.33"
+syn = { version = "2.0.39", features = ["extra-traits", "full"] }
+
+[lib]
+proc-macro = true
+
+[dev-dependencies]
+trybuild = { version = "1.0.85", features = ["diff"] }
+
+[[test]]
+name = "tests"
+path = "./tests/progress.rs"

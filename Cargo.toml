@@ -1,11 +1,17 @@
 [package]
-name = "dialogue"
-version = "0.1.0"
+name = "dialogue-macro"
+version = "0.1.1"
 edition = "2021"
+authors = ["yexiyue"]
+keywords = ["rust", "startup", "cli"]
+description = "dialoguer derive macro"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dialogue-core = { path = "./dialogue-core", version = "0.1.0" }
+dialoguer = "0.11.0"
 
 [workspace]
-members = ["dialogue-macro"]
+members = ["dialogue-core"]

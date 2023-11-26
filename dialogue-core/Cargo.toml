@@ -1,5 +1,5 @@
 [package]
-name = "dialogue-macro"
+name = "dialogue-core"
 version = "0.1.0"
 edition = "2021"
 autotests = false

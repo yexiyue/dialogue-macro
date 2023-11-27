@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 mod dialogue;
 use proc_macro::TokenStream;
 

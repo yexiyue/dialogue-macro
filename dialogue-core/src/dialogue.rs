@@ -3,10 +3,19 @@ use dialogue_type::DialogueType;
 mod parse_field_attribute;
 use parse_field_attribute::{parse_field_attribute, FieldAttributeOptions, FieldDefault};
 use quote::quote;
-use syn::{token::Comma, Field, Lit, Result};
+use syn::{parse2, token::Comma, DeriveInput, Field, Lit, Result};
+
+use crate::DIALOGUE_THEME;
+
+
 
 pub fn dialogue_derive(input: &syn::DeriveInput) -> Result<proc_macro2::TokenStream> {
     let mut res = proc_macro2::TokenStream::new();
+    let theme = get_theme(&input)?;
+    eprintln!("theme: {:?}",theme);
+    unsafe {
+        DIALOGUE_THEME = theme;
+    }
     let fields = get_struct(&input.data)?;
     let impl_t = impl_struct(input, fields)?;
     res.extend(impl_t);
@@ -83,9 +92,14 @@ fn impl_method(fields: &StructFields) -> Result<proc_macro2::TokenStream> {
                         default_vector.resize(new_options.len(), false);
                         for i in p {
                             if let Lit::Str(y) = i {
-                                if let Ok(index) = new_options.binary_search(&y.value()) {
-                                    default_vector[index] = true;
-                                }
+                                let index = new_options
+                                    .iter()
+                                    .position(|x| x == &y.value())
+                                    .ok_or(syn::Error::new_spanned(
+                                        y,
+                                        format!("{:?} not in options", y.value()),
+                                    ))?;
+                                default_vector[index] = true;
                             } else {
                                 return Err(syn::Error::new_spanned(i, "must be string"));
                             }
@@ -171,12 +185,12 @@ fn impl_method(fields: &StructFields) -> Result<proc_macro2::TokenStream> {
                         if let Some(FieldDefault::Lit(Lit::Int(y))) = &default {
                             new_default = Some(y.base10_parse()?);
                         } else if let Some(FieldDefault::Lit(Lit::Str(y))) = &default {
-                            let idx = new_options.binary_search(&y.value()).map_err(|_| {
+                            let idx = new_options.iter().position(|x| x == &y.value()).ok_or(
                                 syn::Error::new_spanned(
                                     y,
                                     format!("{:?} not in options", y.value()),
-                                )
-                            })?;
+                                ),
+                            )?;
                             new_default = Some(idx);
                         }
                         if prompt.is_none() {
@@ -371,4 +385,30 @@ fn get_dialogue_type(field: &syn::Field) -> Result<&syn::Path> {
     } else {
         Err(syn::Error::new_spanned(field, "only support Path type"))
     }
+}
+
+/// 获取主题信息
+fn get_theme(st: &DeriveInput) -> Result<i32> {
+    let theme = st.attrs.iter().find(|attr| attr.path().is_ident("theme"));
+    if let Some(syn::Attribute {
+        meta: syn::Meta::List(syn::MetaList { path, tokens, .. }),
+        ..
+    }) = theme
+    {
+        let ident: syn::Ident = parse2(tokens.clone())?;
+
+        if ident == "simple" {
+            return Ok(0);
+        } else if ident == "colorful" {
+            return Ok(1);
+        } else if ident == "colorful_macro" {
+            return Ok(2);
+        } else {
+            return Err(syn::Error::new_spanned(
+                ident,
+                "only support simple,colorful,colorful_macro",
+            ));
+        }
+    }
+    Ok(2)
 }

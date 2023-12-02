@@ -1,3 +1,4 @@
+use crate::DIALOGUE_THEME;
 use quote::quote;
 use syn::Result;
 pub enum DialogueType<'a> {
@@ -32,11 +33,26 @@ pub enum DialogueType<'a> {
 impl<'a> DialogueType<'a> {
     pub fn get_dialogue(&self) -> Result<proc_macro2::TokenStream> {
         let mut res = proc_macro2::TokenStream::new();
+        let theme = match unsafe { DIALOGUE_THEME } {
+            0 => None,
+            1 => Some(quote!(&dialoguer::theme::ColorfulTheme::default())),
+            2 => Some(quote!(&dialogue_macro::ColorfulTheme::default())),
+            _ => {
+                return Err(syn::Error::new(
+                    proc_macro2::Span::call_site(),
+                    "invalid theme",
+                ))
+            }
+        };
+
         match self {
             DialogueType::Confirm { prompt, default } => {
-                res.extend(quote!(dialoguer::Confirm::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::Confirm::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::Confirm::new()));
+                }
+
                 if let Some(default) = default {
                     res.extend(quote!(
                         .default(#default)
@@ -49,9 +65,11 @@ impl<'a> DialogueType<'a> {
                 }
             }
             DialogueType::Input { prompt, default } => {
-                res.extend(quote!(dialoguer::Input::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::Input::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::Input::new()));
+                }
                 if let Some(default) = default {
                     res.extend(quote!(
                        .default(#default.parse().unwrap())
@@ -64,9 +82,11 @@ impl<'a> DialogueType<'a> {
                 }
             }
             DialogueType::Number { prompt, default } => {
-                res.extend(quote!(dialoguer::Input::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::Input::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::Input::new()));
+                }
                 if let Some(default) = default {
                     match default {
                         syn::Lit::Int(i) => res.extend(quote!(
@@ -91,9 +111,11 @@ impl<'a> DialogueType<'a> {
                 prompt,
                 confirmation,
             } => {
-                res.extend(quote!(dialoguer::Password::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::Password::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::Password::new()));
+                }
                 if prompt.is_some() {
                     res.extend(quote!(
                         .with_prompt(#prompt)
@@ -110,9 +132,11 @@ impl<'a> DialogueType<'a> {
                 default,
                 options,
             } => {
-                res.extend(quote!(dialoguer::Select::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::Select::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::Select::new()));
+                }
                 if let Some(default) = default {
                     res.extend(quote!(
                        .default(#default)
@@ -130,9 +154,11 @@ impl<'a> DialogueType<'a> {
                 default,
                 options,
             } => {
-                res.extend(quote!(dialoguer::MultiSelect::with_theme(
-                    &dialoguer::theme::ColorfulTheme::default()
-                )));
+                if theme.is_some() {
+                    res.extend(quote!(dialoguer::MultiSelect::with_theme(#theme)));
+                } else {
+                    res.extend(quote!(dialoguer::MultiSelect::new()));
+                }
                 res.extend(quote!(#(.item(#options))*));
                 if let Some(default) = default {
                     res.extend(quote!(

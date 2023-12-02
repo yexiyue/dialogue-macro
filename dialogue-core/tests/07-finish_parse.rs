@@ -1,4 +1,4 @@
-use dialogue_macro::Dialogue;
+use dialogue_core::Dialogue;
 // use wasm_startup::init;
 
 #[derive(Dialogue)]

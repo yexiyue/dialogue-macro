@@ -23,3 +23,19 @@ path = "./example/input.rs"
 [[example]]
 name = "number"
 path = "./example/number.rs"
+
+[[example]]
+name = "confirm"
+path = "./example/confirm.rs"
+
+[[example]]
+name = "select"
+path = "./example/select.rs"
+
+[[example]]
+name = "multi_select"
+path = "./example/multi_select.rs"
+
+[[example]]
+name = "define"
+path = "./example/define.rs"

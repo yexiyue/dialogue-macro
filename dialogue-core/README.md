@@ -4,7 +4,7 @@
 ### 使用方式
 
 ```rust
-use dialogue_macro::Dialogue;
+use dialogue_core::Dialogue;
 
 #[derive(Dialogue)]
 struct User {

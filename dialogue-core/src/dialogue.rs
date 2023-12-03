@@ -7,12 +7,9 @@ use syn::{parse2, token::Comma, DeriveInput, Field, Lit, Result};
 
 use crate::DIALOGUE_THEME;
 
-
-
 pub fn dialogue_derive(input: &syn::DeriveInput) -> Result<proc_macro2::TokenStream> {
     let mut res = proc_macro2::TokenStream::new();
     let theme = get_theme(&input)?;
-    eprintln!("theme: {:?}",theme);
     unsafe {
         DIALOGUE_THEME = theme;
     }
@@ -391,7 +388,7 @@ fn get_dialogue_type(field: &syn::Field) -> Result<&syn::Path> {
 fn get_theme(st: &DeriveInput) -> Result<i32> {
     let theme = st.attrs.iter().find(|attr| attr.path().is_ident("theme"));
     if let Some(syn::Attribute {
-        meta: syn::Meta::List(syn::MetaList { path, tokens, .. }),
+        meta: syn::Meta::List(syn::MetaList { tokens, .. }),
         ..
     }) = theme
     {

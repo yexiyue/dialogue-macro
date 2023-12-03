@@ -42,7 +42,7 @@ impl syn::parse::Parse for IdentOrLit {
 #[derive(Debug, Clone)]
 pub struct DialogueItem {
     pub field_name: syn::Ident,
-    pub generic:Option<syn::Generics>,
+    pub generic: Option<syn::Type>,
     pub ty: Option<String>,
     pub default: Option<IdentOrLit>,
     pub confirmation: Option<IdentOrLit>,
@@ -58,7 +58,7 @@ impl syn::parse::Parse for DialogueItem {
         let field_name = input.parse::<syn::Ident>()?;
         let mut res = Self {
             field_name,
-            generic:None,
+            generic: None,
             ty: None,
             default: None,
             confirmation: None,
@@ -66,11 +66,13 @@ impl syn::parse::Parse for DialogueItem {
             password: None,
             options: None,
         };
-        if input.peek(Token![<]){
-            res.generic=Some(input.parse()?);
+        if input.peek(Token![<]) {
+            input.parse::<Token![<]>()?;
+            res.generic = Some(input.parse()?);
+            input.parse::<Token![>]>()?;
         }
         input.parse::<Token![=>]>()?;
-        
+
         let content;
         syn::braced!(content in input);
         let options = content.parse_terminated(FieldValue::parse, Comma)?;

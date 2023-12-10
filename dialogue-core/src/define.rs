@@ -1,5 +1,6 @@
 use syn::{ext::IdentExt, token::Comma, Lit, Token};
 pub mod generate_struct;
+pub mod impl_dialogue_item;
 // 定义结构体，把数据解析出来
 #[derive(Debug, Clone)]
 pub struct DialogueList(syn::punctuated::Punctuated<DialogueItem, Comma>);
@@ -46,8 +47,8 @@ pub struct DialogueItem {
     pub ty: Option<String>,
     pub default: Option<IdentOrLit>,
     pub confirmation: Option<IdentOrLit>,
+    pub mismatch: Option<IdentOrLit>,
     pub prompt: Option<IdentOrLit>,
-    pub password: Option<IdentOrLit>,
     pub options: Option<IdentOrLit>,
 }
 
@@ -63,8 +64,8 @@ impl syn::parse::Parse for DialogueItem {
             default: None,
             confirmation: None,
             prompt: None,
-            password: None,
             options: None,
+            mismatch: None,
         };
         if input.peek(Token![<]) {
             input.parse::<Token![<]>()?;
@@ -81,8 +82,8 @@ impl syn::parse::Parse for DialogueItem {
                 "default" => res.default = Some(item.1),
                 "confirmation" => res.confirmation = Some(item.1),
                 "prompt" => res.prompt = Some(item.1),
-                "password" => res.password = Some(item.1),
                 "options" => res.options = Some(item.1),
+                "mismatch" => res.mismatch = Some(item.1),
                 "ty" => match item.1 {
                     IdentOrLit::Lit(lit) => {
                         if let Lit::Str(ty) = lit {

@@ -1,8 +1,6 @@
-use super::{DialogueItem, DialogueList};
-use proc_macro::Ident;
+use super::DialogueList;
 use quote::quote;
-use syn::spanned::Spanned;
-use syn::{LitStr, Result};
+use syn::Result;
 pub fn generate_struct(input: &DialogueList) -> Result<proc_macro2::TokenStream> {
     let mut res = proc_macro2::TokenStream::new();
     let names = get_names(input);
@@ -95,7 +93,33 @@ fn generate_field(
                     ))
                 }
             }
-            "select" | "multiselect" => {
+            "select"=> {
+                if let Some(syn::Type::Path(syn::TypePath {
+                    path: syn::Path { segments, .. },
+                    ..
+                })) = &item.2
+                {
+                    let last_ident = segments.last().unwrap().ident.to_string();
+                    match last_ident.as_str() {
+                        "String" => res.extend(quote!(
+                            pub #field_name: std::option::Option<#field_type>,
+                        )),
+                        _ => {
+                            res.extend(quote!(
+                                pub #field_name: std::option::Option<#field_type>,
+                            ));
+                            where_case.extend(quote!(
+                                #field_type: ToString + std::fmt::Debug,
+                            ))
+                        }
+                    }
+                } else {
+                    res.extend(quote!(
+                        pub #field_name: std::option::Option<String>,
+                    ))
+                }
+            }
+             "multiselect" => {
                 if let Some(syn::Type::Path(syn::TypePath {
                     path: syn::Path { segments, .. },
                     ..
@@ -167,18 +191,8 @@ fn generate_impl(DialogueList(st): &DialogueList) -> Result<proc_macro2::TokenSt
             }
         }
     ));
-    for DialogueItem {
-        field_name,
-        generic,
-        default,
-        ty,
-        password,
-        confirmation,
-        prompt,
-        options
-    } in st.iter()
-    {
-
+    for dialogue_item in st.iter() {
+        res.extend(dialogue_item.to_tokens())
     }
     Ok(res)
 }

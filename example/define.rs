@@ -36,6 +36,13 @@ dialogue_define!({
     //     options: ["1", "2", "3"],
     //     ty:"select"
     // },
+    a=>{
+        prompt: "请输入B的值",
+        default: OPTIONS,
+        confirmation: "请输入B的值",
+        options: OPTIONS,
+        ty:"multiselect"
+    },
     B=>{
         prompt: "请输入B的值",
         default: DEFAULT,
@@ -71,8 +78,10 @@ dialogue_define!({
 fn main() {
     let mut d = Dialogue::new();
     d.B();
-    d.C("hello world");
-    d.D();
+    // d.C("hello world");
+    // d.D();
+    d.a();
+    // let mut d = Dialogue::new();
     // d.E("请输入密码");
     // d.F("请输入数字");
     // d.H();
@@ -97,6 +106,6 @@ fn main() {
     //     .interact()
     //     .unwrap();
     // println!("{}", res);
-    
+
     println!("{:#?}", d);
 }

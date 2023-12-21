@@ -129,6 +129,7 @@ impl DialogueItem {
 
         Ok((res, head_t))
     }
+
     pub fn default_to_tokens(
         &self,
     ) -> Result<(proc_macro2::TokenStream, proc_macro2::TokenStream)> {
@@ -199,16 +200,36 @@ impl DialogueItem {
                         match default {
                             super::IdentOrLit::Ident(ident) => {
                                 head_t.extend(quote!(
-                                    let default=option.iter().position(|x| x == &#ident).expect("默认值不在选项中");
+                                    let default=option.iter().map(|y|{
+                                        if #ident.iter().find(|x|*x==&y.as_str()).is_some(){
+                                            true
+                                        }else{
+                                            false
+                                        }
+                                    }).collect::<Vec<_>>();
                                 ));
                                 res.extend(quote!(
-                                  .default(default)
+                                  .defaults(&default)
                                 ))
                             }
                             super::IdentOrLit::Lit(lit) => {
                                 return Err(syn::Error::new_spanned(lit, "should be a list"))
                             }
-                            super::IdentOrLit::Lits(lits) => {}
+                            super::IdentOrLit::Lits(lits) => {
+                                head_t.extend(quote!(
+                                    let default_value=vec![#lits];
+                                    let default=option.iter().map(|y|{
+                                        if default_value.iter().find(|x|*x==&y.as_str()).is_some(){
+                                            true
+                                        }else{
+                                            false
+                                        }
+                                    }).collect::<Vec<_>>();
+                                ));
+                                res.extend(quote!(
+                                  .defaults(&default)
+                                ))
+                            }
                         }
                     }
                 }
@@ -268,7 +289,7 @@ impl DialogueItem {
                         #options_t
                         #default_t
                         .interact().unwrap();
-                        
+
                         self.#fn_name=std::option::Option::Some(option[res].clone());
                     ))
                 }
@@ -286,6 +307,8 @@ impl DialogueItem {
                         #options_t
                         #default_t
                         .interact().unwrap();
+                        let result=res.iter().map(|x|option[*x].clone()).collect::<Vec<_>>();
+                        self.#fn_name=std::option::Option::Some(result);
                     ))
                 }
                 _ => unreachable!(),

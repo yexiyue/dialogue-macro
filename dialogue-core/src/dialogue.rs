@@ -163,6 +163,7 @@ fn impl_method(fields: &StructFields) -> Result<proc_macro2::TokenStream> {
                     options,
                     password,
                     confirmation,
+                    mismatch,
                     ..
                 }) = &field_attribute_options
                 {
@@ -225,22 +226,39 @@ fn impl_method(fields: &StructFields) -> Result<proc_macro2::TokenStream> {
                             });
                         }
                     } else if password.is_some() && password.unwrap() {
-                        let confirm_prompt = confirmation
-                            .as_ref()
-                            .map(|p| ("Confirm password", p.as_str()));
+                        let confirm_prompt = confirmation.as_ref().map(|p| {
+                            (
+                                p.as_str(),
+                                mismatch
+                                    .as_ref()
+                                    .map(|m| m.as_str())
+                                    .unwrap_or("两次输入的密码不一致"),
+                            )
+                        });
                         let temp_input = DialogueType::Password {
                             prompt,
                             confirmation: confirm_prompt,
                         };
 
                         let dialogue_type = temp_input.get_dialogue()?;
-                        res.extend(quote! {
-                            pub fn #field_name() ->#field_type  {
-                                #dialogue_type
-                                .interact()
-                                .unwrap()
-                            }
-                        });
+                        if prompt.is_none() {
+                            res.extend(quote! {
+                                pub fn #field_name(prompt:&str) ->#field_type  {
+                                    #dialogue_type
+                                    .with_prompt(prompt)
+                                    .interact()
+                                    .unwrap()
+                                }
+                            });
+                        } else {
+                            res.extend(quote! {
+                                pub fn #field_name() ->#field_type  {
+                                    #dialogue_type
+                                    .interact()
+                                    .unwrap()
+                                }
+                            });
+                        }
                     } else {
                         // 没有options也是输入
                         let default = default.as_ref().and_then(|x| {

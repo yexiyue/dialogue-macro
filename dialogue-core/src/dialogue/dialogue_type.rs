@@ -121,9 +121,9 @@ impl<'a> DialogueType<'a> {
                         .with_prompt(#prompt)
                     ))
                 };
-                if let Some((title, other_prompt)) = confirmation {
+                if let Some((confirmation, mismatch)) = confirmation {
                     res.extend(quote!(
-                        .with_confirmation(#title, #other_prompt)
+                        .with_confirmation(#confirmation, #mismatch)
                     ))
                 }
             }

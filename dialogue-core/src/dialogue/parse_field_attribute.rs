@@ -11,11 +11,19 @@ pub enum FieldDefault {
 pub struct FieldAttributeOptions {
     pub default: Option<FieldDefault>,
     pub confirmation: Option<String>,
+    pub mismatch: Option<String>,
     pub prompt: Option<String>,
     pub password: Option<bool>,
     pub options: Punctuated<Lit, Comma>,
 }
-static WHITE_LIST: [&str; 5] = ["default", "prompt", "options", "password", "confirmation"];
+static WHITE_LIST: [&str; 6] = [
+    "default",
+    "prompt",
+    "options",
+    "password",
+    "confirmation",
+    "mismatch",
+];
 
 /// 实现parse trait
 impl syn::parse::Parse for FieldAttributeOptions {
@@ -24,6 +32,7 @@ impl syn::parse::Parse for FieldAttributeOptions {
             default: None,
             prompt: None,
             confirmation: None,
+            mismatch: None,
             password: None,
             options: Punctuated::new(),
         };
@@ -65,6 +74,16 @@ impl syn::parse::Parse for FieldAttributeOptions {
                     "confirmation" => {
                         if let syn::Lit::Str(s) = literal {
                             res.confirmation = Some(s.value());
+                        } else {
+                            return Err(syn::Error::new_spanned(
+                                &ident,
+                                "confirmation should be a string",
+                            ));
+                        }
+                    }
+                    "mismatch" => {
+                        if let syn::Lit::Str(s) = literal {
+                            res.mismatch = Some(s.value());
                         } else {
                             return Err(syn::Error::new_spanned(
                                 &ident,

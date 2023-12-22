@@ -1,6 +1,6 @@
 [package]
 name = "dialogue-macro"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["yexiyue"]
 keywords = ["rust", "startup", "cli"]
@@ -18,24 +18,41 @@ members = ["dialogue-core"]
 
 [[example]]
 name = "input"
-path = "./example/input.rs"
+path = "./example/dialogue/input.rs"
 
 [[example]]
-name = "number"
-path = "./example/number.rs"
+name = "password"
+path = "./example/dialogue/password.rs"
 
 [[example]]
 name = "confirm"
-path = "./example/confirm.rs"
+path = "./example/dialogue/confirm.rs"
 
 [[example]]
 name = "select"
-path = "./example/select.rs"
+path = "./example/dialogue/select.rs"
 
 [[example]]
-name = "multi_select"
-path = "./example/multi_select.rs"
+name = "multiselect"
+path = "./example/dialogue/multiselect.rs"
 
 [[example]]
-name = "define"
-path = "./example/define.rs"
+name = "input2"
+path = "./example/dialogue_define/input.rs"
+
+[[example]]
+name = "password2"
+path = "./example/dialogue_define/password.rs"
+
+[[example]]
+name = "confirm2"
+path = "./example/dialogue_define/confirm.rs"
+
+[[example]]
+name = "select2"
+path = "./example/dialogue_define/select.rs"
+
+[[example]]
+name = "multiselect2"
+path = "./example/dialogue-define/multiselect.rs"
+

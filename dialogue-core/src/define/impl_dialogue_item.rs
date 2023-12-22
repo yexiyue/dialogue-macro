@@ -1,6 +1,6 @@
 use super::DialogueItem;
 use quote::{quote, ToTokens};
-use syn::Result;
+use syn::{Lit, Result};
 
 impl DialogueItem {
     pub fn to_tokens(&self) -> Result<proc_macro2::TokenStream> {
@@ -32,18 +32,18 @@ impl DialogueItem {
                 }
             })
         }
-
         Ok(res)
     }
 
     pub fn ty_to_tokens(&self) -> Result<proc_macro2::TokenStream> {
         let mut res = proc_macro2::TokenStream::new();
+
         if let Some(dialogue_type) = &self.ty {
             match dialogue_type.as_str() {
-                "input" => res.extend(quote!(dialoguer::Input::with_theme(
+                "password" => res.extend(quote!(dialoguer::Password::with_theme(
                     &dialogue_macro::ColorfulTheme::default()
                 ))),
-                "password" => res.extend(quote!(dialoguer::Password::with_theme(
+                "input" => res.extend(quote!(dialoguer::Input::with_theme(
                     &dialogue_macro::ColorfulTheme::default()
                 ))),
                 "select" => res.extend(quote!(dialoguer::Select::with_theme(
@@ -102,10 +102,10 @@ impl DialogueItem {
             match options {
                 super::IdentOrLit::Ident(ident) => {
                     head_t.extend(quote!(
-                      let option = #ident.map(|x| x.to_string());
+                      let option = &#ident;
                     ));
                     res.extend(quote!(
-                      .items(&option)
+                      .items(option)
                     ))
                 }
                 super::IdentOrLit::Lit(lit) => {
@@ -113,10 +113,10 @@ impl DialogueItem {
                 }
                 super::IdentOrLit::Lits(lits) => {
                     head_t.extend(quote!(
-                      let option = [#lits];
+                      let option = &[#lits];
                     ));
                     res.extend(quote!(
-                      .items(&option)
+                      .items(option)
                     ))
                 }
             }
@@ -184,11 +184,19 @@ impl DialogueItem {
                     if let Some(default) = &self.default {
                         match default {
                             super::IdentOrLit::Ident(ident) => res.extend(quote!(
-                              .default(format!("{}",#ident))
+                              .default(#ident)
                             )),
-                            super::IdentOrLit::Lit(lit) => res.extend(quote!(
-                               .default(#lit.parse().unwrap())
-                            )),
+                            super::IdentOrLit::Lit(lit) => {
+                                if let Lit::Str(_) = lit {
+                                    res.extend(quote!(
+                                       .default(#lit.parse().unwrap())
+                                    ));
+                                } else {
+                                    res.extend(quote!(
+                                       .default(#lit)
+                                    ));
+                                }
+                            }
                             super::IdentOrLit::Lits(lits) => {
                                 return Err(syn::Error::new_spanned(lits, "input not support list"))
                             }
@@ -201,7 +209,9 @@ impl DialogueItem {
                             super::IdentOrLit::Ident(ident) => {
                                 head_t.extend(quote!(
                                     let default=option.iter().map(|y|{
-                                        if #ident.iter().find(|x|*x==&y.as_str()).is_some(){
+                                        if #ident.iter().find(|x|{
+                                            x==&y
+                                        }).is_some(){
                                             true
                                         }else{
                                             false
@@ -219,7 +229,7 @@ impl DialogueItem {
                                 head_t.extend(quote!(
                                     let default_value=vec![#lits];
                                     let default=option.iter().map(|y|{
-                                        if default_value.iter().find(|x|*x==&y.as_str()).is_some(){
+                                        if default_value.iter().find(|x|x==&y).is_some(){
                                             true
                                         }else{
                                             false
@@ -234,21 +244,31 @@ impl DialogueItem {
                     }
                 }
                 _ => {
-                    return Err(syn::Error::new_spanned(
-                        &self.ty,
-                        format!("{:?} not support default", dialogue_type),
-                    ))
+                    if let Some(_) = &self.default {
+                        return Err(syn::Error::new_spanned(
+                            &self.ty,
+                            format!("{:?} not support default", dialogue_type),
+                        ));
+                    }
                 }
             }
         } else {
             if let Some(default) = &self.default {
                 match default {
                     super::IdentOrLit::Ident(ident) => res.extend(quote!(
-                      .default(format!("{}",#ident))
+                      .default(#ident)
                     )),
-                    super::IdentOrLit::Lit(lit) => res.extend(quote!(
-                       .default(#lit.parse().unwrap())
-                    )),
+                    super::IdentOrLit::Lit(lit) => {
+                        if let Lit::Str(_) = lit {
+                            res.extend(quote!(
+                               .default(#lit.parse().unwrap())
+                            ));
+                        } else {
+                            res.extend(quote!(
+                               .default(#lit)
+                            ));
+                        }
+                    }
                     super::IdentOrLit::Lits(lits) => {
                         return Err(syn::Error::new_spanned(lits, "input not support list"))
                     }
@@ -274,6 +294,7 @@ impl DialogueItem {
                 )),
                 "password" => {
                     let confirmation_t = self.confirmation_to_tokens()?;
+                    eprintln!("{}", confirmation_t);
                     res.extend(quote!(
                         #confirmation_t
                         .interact().unwrap();

@@ -93,7 +93,7 @@ fn generate_field(
                     ))
                 }
             }
-            "select"=> {
+            "select" => {
                 if let Some(syn::Type::Path(syn::TypePath {
                     path: syn::Path { segments, .. },
                     ..
@@ -115,11 +115,11 @@ fn generate_field(
                     }
                 } else {
                     res.extend(quote!(
-                        pub #field_name: std::option::Option<String>,
+                        pub #field_name: std::option::Option<&'static str>,
                     ))
                 }
             }
-             "multiselect" => {
+            "multiselect" => {
                 if let Some(syn::Type::Path(syn::TypePath {
                     path: syn::Path { segments, .. },
                     ..
@@ -141,7 +141,7 @@ fn generate_field(
                     }
                 } else {
                     res.extend(quote!(
-                        pub #field_name: std::option::Option<Vec<String>>,
+                        pub #field_name: std::option::Option<Vec<&'static str>>,
                     ))
                 }
             }

@@ -1,5 +1,0 @@
-error: expected literal or square brackets
- --> tests/06-field_attribute_error.rs:5:26
-  |
-5 |     #[dialogue(default = ("wasm-project","wasm-project2"), prompt = "请输入项目名称" options=["wasm-project","wasm-project2",123], multi_sel    ...
-  |                          ^

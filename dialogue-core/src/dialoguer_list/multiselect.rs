@@ -81,19 +81,6 @@ impl ParseFieldAttr for MultiSelect {
             ))
         }
 
-        if default.is_some() {
-            gen_default.extend(quote!(
-                let mut default=vec![false;options.len()]
-                let temp=vec![#default]
-                for i in 0..temp.len(){
-                    default[temp[i]]=true;
-                }
-            ));
-            body.extend(quote!(
-                .defaults(&default)
-            ))
-        }
-
         if options.is_some() {
             gen_options.extend(quote!(
                 let options=&vec!#options;
@@ -106,6 +93,19 @@ impl ParseFieldAttr for MultiSelect {
         body.extend(quote!(
             .items(options)
         ));
+
+        if default.is_some() {
+            gen_default.extend(quote!(
+                let mut default=vec![false;options.len()];
+                let temp=vec![#default];
+                for i in 0..temp.len(){
+                    default[temp[i]]=true;
+                }
+            ));
+            body.extend(quote!(
+                .defaults(&default)
+            ))
+        }
 
         Ok(quote! {
             pub fn #field_name(&mut self,#params) -> &mut Self{

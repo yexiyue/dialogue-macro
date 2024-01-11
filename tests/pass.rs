@@ -1,9 +1,12 @@
+#![allow(unused)]
+
 use dialogue_macro::Asker;
 #[derive(Debug, Asker)]
 #[theme(colorful_macro)]
 struct User {
     name: String,
     age: u32,
+    #[password(prompt="请输入密码")]
     email: Option<String>,
     #[multiselect(options=[ 
         Person{name:"5".to_string(),age:10},
@@ -27,34 +30,11 @@ impl ToString for Person {
     }
 }
 
-// impl User {
-//     fn asker() -> UserAsker {
-//         UserAsker::default()
-//     }
-// }
-
-// struct UserAsker {
-//     name: Option<String>,
-//     age: Option<u32>,
-//     email: Option<String>,
-//     favorite: Vec<String>,
-// }
-
-// impl Default for UserAsker {
-//     fn default() -> Self {
-//         Self {
-//             name: None,
-//             age: None,
-//             email: None,
-//             favorite: vec!["5".to_string()],
-//         }
-//     }
-// }
 
 fn main() {
     let mut asker=User::asker();
-    asker.boy();
-    asker.age("你多少岁了").name("你叫什么名字").favorite("你最喜欢的数字是多少");
-    let user=asker.finish();
-    println!("{:#?}",user);
+    // asker.boy();
+    // asker.age("你多少岁了").name("你叫什么名字").favorite("你最喜欢的数字是多少").email();
+    // let user=asker.finish();
+    // println!("{:#?}",user);
 }

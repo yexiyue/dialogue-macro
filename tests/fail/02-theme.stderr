@@ -1,0 +1,5 @@
+error: only support simple,colorful,colorful_macro
+ --> tests/fail/02-theme.rs:3:9
+  |
+3 | #[theme(abc)]
+  |         ^^^

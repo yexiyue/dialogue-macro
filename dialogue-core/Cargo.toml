@@ -2,7 +2,6 @@
 name = "dialogue-core"
 version = "0.2.0"
 edition = "2021"
-autotests = false
 authors = ["yexiyue"]
 keywords = ["rust", "macro", "dialogue"]
 description = "the core of dialogue-macro"
@@ -18,10 +17,3 @@ syn = { version = "2.0.39", features = ["extra-traits", "full"] }
 
 [lib]
 proc-macro = true
-
-[dev-dependencies]
-trybuild = { version = "1.0.85", features = ["diff"] }
-
-[[test]]
-name = "tests"
-path = "./tests/progress.rs"

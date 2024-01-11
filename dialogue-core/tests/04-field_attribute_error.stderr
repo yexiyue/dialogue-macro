@@ -1,5 +1,0 @@
-error: only support default, prompt, options
- --> tests/04-field_attribute_error.rs:5:16
-  |
-5 |     #[dialogue(default1 = "wasm-project", prompt = "请输入项目名称" ,options=["wasm-project","wasm-project2",123], multi_select = true)]    ...
-  |                ^^^^^^^^

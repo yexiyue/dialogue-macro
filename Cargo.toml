@@ -3,6 +3,7 @@ name = "dialogue-macro"
 version = "0.2.0"
 edition = "2021"
 authors = ["yexiyue"]
+autotests = false
 keywords = ["rust", "macro", "dialogue"]
 description = "a macro for dialogue"
 repository = "https://github.com/yexiyue/dialogue-macro"
@@ -14,13 +15,33 @@ license = "MIT"
 dialogue-core = { path = "./dialogue-core", version = "0.2.0" }
 dialoguer = "0.11.0"
 
-[workspace]
-members = ["dialogue-core"]
+[dev-dependencies]
+trybuild = { version = "1.0.85", features = ["diff"] }
+
+[[test]]
+name = "tests"
+path = "./tests/progress.rs"
+
 
 [[example]]
 name = "input"
-path = "./example/dialogue/input.rs"
+path = "examples/input.rs"
 
 [[example]]
-name = "test"
-path = "./example/test.rs"
+name = "password"
+path = "examples/password.rs"
+
+[[example]]
+name = "select"
+path = "examples/select.rs"
+
+[[example]]
+name = "confirm"
+path = "examples/confirm.rs"
+
+[[example]]
+name = "multiselect"
+path = "examples/multiselect.rs"
+
+[workspace]
+members = ["dialogue-core"]

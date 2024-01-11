@@ -231,7 +231,6 @@ impl Theme for ColorfulTheme {
     }
 
     /// Formats a password prompt after selection.
-    #[cfg(feature = "password")]
     fn format_password_prompt_selection(
         &self,
         f: &mut dyn fmt::Write,

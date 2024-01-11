@@ -16,7 +16,7 @@ pub fn get_fields(st: &DeriveInput) -> Result<&Punctuated<Field, Comma>> {
     } else {
         Err(syn::Error::new(
             proc_macro2::Span::call_site(),
-            "only support struct",
+            "only support named struct",
         ))
     }
 }

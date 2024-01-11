@@ -1,1 +1,1 @@
-该crate是dialogue-macro库的核心，具体的用法请参考[dialogue-macro](https://crates.io/crates/dialogue-macro)
+该crate是dialogue-macro库的核心库，具体的用法请参考[dialogue-macro](https://crates.io/crates/dialogue-macro)

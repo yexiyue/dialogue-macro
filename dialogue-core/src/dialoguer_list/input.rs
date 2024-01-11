@@ -1,11 +1,11 @@
 use super::ParseFieldAttr;
 use quote::quote;
-use syn::Result;
+use syn::{ExprLit, Lit, Result};
 
 #[derive(Debug, Default)]
 pub struct Input {
     pub prompt: Option<String>,
-    pub default: Option<String>,
+    pub default: Option<ExprLit>,
 }
 
 impl ParseFieldAttr for Input {
@@ -23,8 +23,8 @@ impl ParseFieldAttr for Input {
             }
             if meta.path.is_ident("default") {
                 meta.value()?;
-                let value = meta.input.parse::<syn::LitStr>()?;
-                res.default = Some(value.value());
+                let value = meta.input.parse::<syn::ExprLit>()?;
+                res.default = Some(value);
                 return Ok(());
             }
             Err(meta.error("expected `prompt` or `default`"))
@@ -32,7 +32,11 @@ impl ParseFieldAttr for Input {
         Ok(res)
     }
 
-    fn generate_method(&self, field_name: &Option<syn::Ident>,_inner_ty: Option<&syn::Type>,) -> Result<proc_macro2::TokenStream> {
+    fn generate_method(
+        &self,
+        field_name: &Option<syn::Ident>,
+        _inner_ty: Option<&syn::Type>,
+    ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
         // 设置主题
@@ -46,7 +50,7 @@ impl ParseFieldAttr for Input {
             });
         }
         let Self { prompt, default } = self;
-        
+
         if self.prompt.is_some() {
             body.extend(quote!(
                 .with_prompt(#prompt)
@@ -61,9 +65,18 @@ impl ParseFieldAttr for Input {
         }
 
         if default.is_some() {
-            body.extend(quote!(
-                .default(#default.parse().unwrap())
-            ))
+            if let Some(ExprLit {
+                lit: Lit::Str(_), ..
+            }) = default
+            {
+                body.extend(quote!(
+                    .default(#default.parse().unwrap())
+                ))
+            } else {
+                body.extend(quote!(
+                    .default(#default)
+                ))
+            }
         }
 
         Ok(quote! {

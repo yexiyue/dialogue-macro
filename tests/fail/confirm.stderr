@@ -1,0 +1,14 @@
+error: Confirm only support bool or Option<bool> type
+ --> tests/fail/confirm.rs:8:14
+  |
+8 |     student: Option<String>,
+  |              ^^^^^^^^^^^^^^
+
+error[E0599]: no function or associated item named `asker` found for struct `User` in the current scope
+  --> tests/fail/confirm.rs:12:22
+   |
+5  | struct User {
+   | ----------- function or associated item `asker` not found for this struct
+...
+12 |     let user = User::asker().boy("你是男孩吗？").student().finish();
+   |                      ^^^^^ function or associated item not found in `User`

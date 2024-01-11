@@ -78,21 +78,22 @@ impl ParseFieldAttr for Select {
             ))
         }
 
-        if default.is_some() {
-            body.extend(quote!(
-                .default(#default)
-            ))
-        }
-
         if options.is_some() {
             gen_options.extend(quote!(
-                let options:&[#inner_ty]=&vec!#options;
+                let options=&vec!#options;
             ));
         } else {
             params.extend(quote! {
                 options: &[#inner_ty],
             });
         }
+
+        if default.is_some() {
+            body.extend(quote!(
+                .default(#default)
+            ))
+        }
+        
         body.extend(quote!(
             .items(options)
         ));

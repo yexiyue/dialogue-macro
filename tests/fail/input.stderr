@@ -1,0 +1,20 @@
+error: expected attribute arguments in parentheses: #[input(...)]
+ --> tests/fail/input.rs:7:7
+  |
+7 |     #[input]
+  |       ^^^^^
+
+error: cannot find attribute `abc` in this scope
+ --> tests/fail/input.rs:5:7
+  |
+5 |     #[abc]
+  |       ^^^
+
+error[E0599]: no function or associated item named `asker` found for struct `User` in the current scope
+  --> tests/fail/input.rs:14:26
+   |
+4  | struct User {
+   | ----------- function or associated item `asker` not found for this struct
+...
+14 |     let mut user = User::asker();
+   |                          ^^^^^ function or associated item not found in `User`

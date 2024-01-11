@@ -1,6 +1,6 @@
 [package]
 name = "dialogue-macro"
-version = "0.1.3"
+version = "0.2.0"
 edition = "2021"
 authors = ["yexiyue"]
 keywords = ["rust", "macro", "dialogue"]
@@ -11,7 +11,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dialogue-core = { path = "./dialogue-core", version = "0.1.3" }
+dialogue-core = { path = "./dialogue-core", version = "0.2.0" }
 dialoguer = "0.11.0"
 
 [workspace]
@@ -22,37 +22,5 @@ name = "input"
 path = "./example/dialogue/input.rs"
 
 [[example]]
-name = "password"
-path = "./example/dialogue/password.rs"
-
-[[example]]
-name = "confirm"
-path = "./example/dialogue/confirm.rs"
-
-[[example]]
-name = "select"
-path = "./example/dialogue/select.rs"
-
-[[example]]
-name = "multiselect"
-path = "./example/dialogue/multiselect.rs"
-
-[[example]]
-name = "input2"
-path = "./example/dialogue_define/input.rs"
-
-[[example]]
-name = "password2"
-path = "./example/dialogue_define/password.rs"
-
-[[example]]
-name = "confirm2"
-path = "./example/dialogue_define/confirm.rs"
-
-[[example]]
-name = "select2"
-path = "./example/dialogue_define/select.rs"
-
-[[example]]
-name = "multiselect2"
-path = "./example/dialogue-define/multiselect.rs"
+name = "test"
+path = "./example/test.rs"

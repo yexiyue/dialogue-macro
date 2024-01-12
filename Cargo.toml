@@ -1,18 +1,18 @@
 [package]
 name = "dialogue-macro"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["yexiyue"]
 autotests = false
-keywords = ["rust", "macro", "dialogue"]
-description = "a macro for dialogue"
+keywords = ["rust", "macro", "dialoguer"]
+description = "An extension to dialoguer that simplifies command-line interaction interfaces."
 repository = "https://github.com/yexiyue/dialogue-macro"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dialogue-core = { path = "./dialogue-core", version = "0.2.0" }
+dialogue-core = { path = "./dialogue-core", version = "0.2.1" }
 dialoguer = "0.11.0"
 
 [dev-dependencies]
@@ -21,27 +21,6 @@ trybuild = { version = "1.0.85", features = ["diff"] }
 [[test]]
 name = "tests"
 path = "./tests/progress.rs"
-
-
-[[example]]
-name = "input"
-path = "examples/input.rs"
-
-[[example]]
-name = "password"
-path = "examples/password.rs"
-
-[[example]]
-name = "select"
-path = "examples/select.rs"
-
-[[example]]
-name = "confirm"
-path = "examples/confirm.rs"
-
-[[example]]
-name = "multiselect"
-path = "examples/multiselect.rs"
 
 [workspace]
 members = ["dialogue-core"]

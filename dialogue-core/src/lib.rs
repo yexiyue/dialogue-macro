@@ -1,3 +1,7 @@
+/*!
+该crate是dialogue-macro库的核心库，具体的用法请参考[dialogue-macro](https://docs.rs/dialogue-macro/latest/dialogue_macro/)
+ */
+
 use dialoguer::entrypoint;
 use proc_macro::TokenStream;
 mod dialoguer;

@@ -1,6 +1,6 @@
 # dialogue-macro
 
-[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro)[![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro)
+[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro) [![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro)
 
 dialogue-macro 是一个 Rust 宏封装库，它作为 [dialoguer](https://docs.rs/dialoguer/latest/dialoguer/) 的扩展，为命令行交互界面的构建提供了更为简洁和直观的方法。通过利用 `Asker` 宏的力量，开发者可以迅速搭建一系列用户友好且功能丰富的对话界面。
 

@@ -18,7 +18,6 @@ jobs:
         run: cargo test -- tests
       - name: Publish
         run: |
-          cd dialogue-core
           cargo publish -p dialogue-core --token ${{ secrets.CRATE_TOKEN }}
           cargo publish --token ${{ secrets.CRATE_TOKEN }}
           

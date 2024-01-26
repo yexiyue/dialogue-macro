@@ -19,7 +19,6 @@ jobs:
       - name: Publish
         run: |
           cd dialogue-core
-          cargo publish --token ${{ secrets.CRATE_TOKEN }}
-          cd ../
+          cargo publish -p dialogue-core --token ${{ secrets.CRATE_TOKEN }}
           cargo publish --token ${{ secrets.CRATE_TOKEN }}
           

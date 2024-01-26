@@ -77,7 +77,7 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
                 }
             }
         }
-        struct #asker_name{
+        pub struct #asker_name{
             #asker_fields
         }
 

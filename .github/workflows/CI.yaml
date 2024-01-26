@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Test
+        run: cargo test -- tests
+      - name: Publish
+        run: cargo publish --token ${{ secrets.CRATE_TOKEN }}
+          

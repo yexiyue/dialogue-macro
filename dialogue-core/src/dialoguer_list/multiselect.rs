@@ -7,6 +7,7 @@ pub struct MultiSelect {
     pub prompt: Option<String>,
     pub default: Option<Punctuated<LitInt, Comma>>,
     pub options: Option<ExprArray>,
+    pub with_default: bool,
 }
 
 impl ParseFieldAttr for MultiSelect {
@@ -15,6 +16,7 @@ impl ParseFieldAttr for MultiSelect {
             prompt: None,
             default: None,
             options: None,
+            with_default: false,
         };
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("prompt") {
@@ -38,6 +40,14 @@ impl ParseFieldAttr for MultiSelect {
                 res.options = Some(value);
                 return Ok(());
             }
+
+            if meta.path.is_ident("with_default") {
+                meta.value()?;
+                let value = meta.input.parse::<syn::LitBool>()?;
+                res.with_default = value.value();
+                return Ok(());
+            }
+
             Err(meta.error("expected `prompt` , `default` or  `options`"))
         })?;
         Ok(res)
@@ -66,6 +76,7 @@ impl ParseFieldAttr for MultiSelect {
             prompt,
             default,
             options,
+            with_default,
         } = self;
 
         if self.prompt.is_some() {
@@ -104,6 +115,15 @@ impl ParseFieldAttr for MultiSelect {
             ));
             body.extend(quote!(
                 .defaults(&default)
+            ))
+        }
+
+        if *with_default {
+            params.extend(quote! {
+                defaults: &[bool],
+            });
+            body.extend(quote!(
+                .defaults(&defaults)
             ))
         }
 

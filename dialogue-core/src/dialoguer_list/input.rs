@@ -2,17 +2,32 @@ use super::ParseFieldAttr;
 use quote::quote;
 use syn::{ExprLit, Lit, Result};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Input {
     pub prompt: Option<String>,
     pub default: Option<ExprLit>,
+    pub with_default: bool,
+    inner_ty: syn::Type,
+}
+
+impl Default for Input {
+    fn default() -> Self {
+        Self {
+            prompt: None,
+            default: None,
+            with_default: false,
+            inner_ty: syn::parse_str("String").unwrap(),
+        }
+    }
 }
 
 impl ParseFieldAttr for Input {
-    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
+    fn parse_field_attr_with_inner_ty(attr: &syn::Attribute, inner_ty: &syn::Type) -> Result<Self> {
         let mut res = Self {
             prompt: None,
             default: None,
+            with_default: false,
+            inner_ty: inner_ty.clone(),
         };
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("prompt") {
@@ -27,6 +42,14 @@ impl ParseFieldAttr for Input {
                 res.default = Some(value);
                 return Ok(());
             }
+
+            if meta.path.is_ident("with_default") {
+                meta.value()?;
+                let value = meta.input.parse::<syn::LitBool>()?;
+                res.with_default = value.value();
+                return Ok(());
+            }
+
             Err(meta.error("expected `prompt` or `default`"))
         })?;
         Ok(res)
@@ -49,7 +72,12 @@ impl ParseFieldAttr for Input {
                 let res=dialogue_macro::dialoguer::Input::new()
             });
         }
-        let Self { prompt, default } = self;
+        let Self {
+            prompt,
+            default,
+            with_default,
+            inner_ty,
+        } = self;
 
         if self.prompt.is_some() {
             body.extend(quote!(
@@ -77,6 +105,15 @@ impl ParseFieldAttr for Input {
                     .default(#default)
                 ))
             }
+        }
+
+        if *with_default {
+            params.extend(quote! {
+                default: #inner_ty,
+            });
+            body.extend(quote!(
+                .default(default)
+            ))
         }
 
         Ok(quote! {

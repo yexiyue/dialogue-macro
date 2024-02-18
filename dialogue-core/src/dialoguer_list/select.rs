@@ -7,6 +7,7 @@ pub struct Select {
     pub prompt: Option<String>,
     pub default: Option<usize>,
     pub options: Option<ExprArray>,
+    pub with_default: bool,
 }
 
 impl ParseFieldAttr for Select {
@@ -15,6 +16,7 @@ impl ParseFieldAttr for Select {
             prompt: None,
             default: None,
             options: None,
+            with_default: false,
         };
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("prompt") {
@@ -34,6 +36,13 @@ impl ParseFieldAttr for Select {
                 meta.value()?;
                 let value = meta.input.parse::<syn::ExprArray>()?;
                 res.options = Some(value);
+                return Ok(());
+            }
+
+            if meta.path.is_ident("with_default") {
+                meta.value()?;
+                let value = meta.input.parse::<syn::LitBool>()?;
+                res.with_default = value.value();
                 return Ok(());
             }
             Err(meta.error("expected `prompt` , `default` or  `options`"))
@@ -63,6 +72,7 @@ impl ParseFieldAttr for Select {
             prompt,
             default,
             options,
+            with_default,
         } = self;
 
         if self.prompt.is_some() {
@@ -93,7 +103,16 @@ impl ParseFieldAttr for Select {
                 .default(#default)
             ))
         }
-        
+
+        if *with_default {
+            params.extend(quote! {
+                default: usize,
+            });
+            body.extend(quote!(
+                .default(default)
+            ))
+        }
+
         body.extend(quote!(
             .items(options)
         ));

@@ -11,7 +11,15 @@ trait ParseFieldAttr
 where
     Self: Sized,
 {
-    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self>;
+    #[allow(unused)]
+    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
+        unimplemented!()
+    }
+    #[allow(unused)]
+    fn parse_field_attr_with_inner_ty(attr: &syn::Attribute, inner_ty: &syn::Type) -> Result<Self> {
+        unimplemented!()
+    }
+
     fn generate_method(
         &self,
         field_name: &Option<syn::Ident>,
@@ -62,15 +70,11 @@ impl DialoguerList {
         if let Some(syn::Type::Path(syn::TypePath { path, .. })) = get_inner_type(ty, outer) {
             if path.is_ident(name) {
                 return true;
-            } else {
-                return false;
             }
         } else {
             if let syn::Type::Path(syn::TypePath { path, .. }) = ty {
                 if path.is_ident(name) {
                     return true;
-                } else {
-                    return false;
                 }
             }
         }
@@ -82,31 +86,31 @@ impl DialoguerList {
             if let Some(dialogue) = DialoguerList::get_dialogue(attr) {
                 match dialogue {
                     "Input" => {
-                        return Ok(DialoguerList::Input(input::Input::parse_field_attr(attr)?));
+                        return Ok(DialoguerList::Input(
+                            input::Input::parse_field_attr_with_inner_ty(attr, &field.ty)?,
+                        ));
                     }
                     "Password" => {
                         if Self::is_some_type(&field.ty, "String", "Option") {
                             return Ok(DialoguerList::Password(
                                 password::Password::parse_field_attr(attr)?,
                             ));
-                        } else {
-                            return Err(syn::Error::new_spanned(
-                                &field.ty,
-                                "Password only support String or Option<String> type",
-                            ));
                         }
+                        return Err(syn::Error::new_spanned(
+                            &field.ty,
+                            "Password only support String or Option<String> type",
+                        ));
                     }
                     "Confirm" => {
                         if Self::is_some_type(&field.ty, "bool", "Option") {
                             return Ok(DialoguerList::Confirm(confirm::Confirm::parse_field_attr(
                                 attr,
                             )?));
-                        } else {
-                            return Err(syn::Error::new_spanned(
-                                &field.ty,
-                                "Confirm only support bool or Option<bool> type",
-                            ));
                         }
+                        return Err(syn::Error::new_spanned(
+                            &field.ty,
+                            "Confirm only support bool or Option<bool> type",
+                        ));
                     }
                     "Select" => {
                         if let Some(ty) = get_inner_type(&field.ty, "Option") {
@@ -114,12 +118,11 @@ impl DialoguerList {
                                 select::Select::parse_field_attr(attr)?,
                                 ty.clone(),
                             ));
-                        } else {
-                            return Ok(DialoguerList::Select(
-                                select::Select::parse_field_attr(attr)?,
-                                field.ty.clone(),
-                            ));
                         }
+                        return Ok(DialoguerList::Select(
+                            select::Select::parse_field_attr(attr)?,
+                            field.ty.clone(),
+                        ));
                     }
                     "MultiSelect" => {
                         if let Some(ty) = get_inner_type(&field.ty, "Vec") {
@@ -127,12 +130,11 @@ impl DialoguerList {
                                 multiselect::MultiSelect::parse_field_attr(attr)?,
                                 ty.clone(),
                             ));
-                        } else {
-                            return Err(syn::Error::new_spanned(
-                                &field.ty,
-                                "multiselect only support Vec type",
-                            ));
                         }
+                        return Err(syn::Error::new_spanned(
+                            &field.ty,
+                            "multiselect only support Vec type",
+                        ));
                     }
                     _ => unreachable!(),
                 }
@@ -144,18 +146,16 @@ impl DialoguerList {
                             multiselect::MultiSelect::parse_field_attr(attr)?,
                             get_inner_type(&field.ty, "Vec").unwrap().clone(),
                         ));
-                    } else {
-                        return Err(syn::Error::new_spanned(
-                            &field.ty,
-                            "multiselect only support Vec type",
-                        ));
                     }
-                } else {
                     return Err(syn::Error::new_spanned(
                         &field.ty,
                         "multiselect only support Vec type",
                     ));
-                };
+                }
+                return Err(syn::Error::new_spanned(
+                    &field.ty,
+                    "multiselect only support Vec type",
+                ));
             }
         }
 

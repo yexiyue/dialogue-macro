@@ -15,7 +15,7 @@ struct User {
         School{
             name: "河南理工大学".to_string(),
         }
-    ])]
+    ],with_default=true)]
     school: Option<School>,
 }
 
@@ -31,7 +31,7 @@ impl ToString for School {
 }
 
 fn main() {
-    let user = User::asker().sex().school().finish();
+    let user = User::asker().sex().school(2).finish();
 
     println!("{:?}", user);
 }

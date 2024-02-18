@@ -5,7 +5,7 @@ use dialogue_macro::Asker;
 struct User {
     #[multiselect(prompt = "Please select you favorite", options = ["eat", "sleep", "code"],default=[1])]
     favorite: Vec<String>,
-    #[multiselect(prompt = "Please select you school: ", default = [1,2],options=[
+    #[multiselect(prompt = "Please select you school: ",with_default=true, default = [1,2],options=[
         School{
             name: "清华大学".to_string(),
         },
@@ -31,7 +31,10 @@ impl ToString for School {
 }
 
 fn main() {
-    let user = User::asker().school().favorite().finish();
+    let user = User::asker()
+        .school(&vec![true, false, true])
+        .favorite()
+        .finish();
 
     println!("{:?}", user);
 }

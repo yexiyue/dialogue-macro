@@ -4,9 +4,9 @@ use dialogue_macro::Asker;
 #[derive(Asker, Debug)]
 struct User {
     name: String,
-    #[input(prompt = "Enter your email address: ")]
+    #[input(prompt = "Enter your email address: ", with_default = true)]
     email: String,
-    #[input(default = 16)]
+    #[input(default = 16,with_default = true)]
     age: u8,
     #[input(prompt = "Enter your school: ", default = "清华大学")]
     school: Option<String>,
@@ -15,8 +15,8 @@ struct User {
 fn main() {
     let user = User::asker()
         .name("Enter your name: ")
-        .email()
-        .age("Enter your age: ")
+        .email("yexiyue666@qq.com".into())
+        .age("Enter your age: ",17)
         .school()
         .finish();
 

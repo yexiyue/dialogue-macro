@@ -1,0 +1,6 @@
+[book]
+authors = ["yexiyue"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Dialogue Macro"

@@ -198,7 +198,7 @@ fn main() {
 
 #[proc_macro_derive(
     Asker,
-    attributes(input, confirm, password, select, multiselect, theme)
+    attributes(input, confirm, password, select, multiselect, theme, asker)
 )]
 pub fn dialoguer(input: TokenStream) -> TokenStream {
     let st = syn::parse_macro_input!(input as syn::DeriveInput);

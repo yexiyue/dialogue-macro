@@ -4,8 +4,8 @@ use crate::{
     DIALOGUE_THEME,
 };
 use quote::quote;
-use syn::Result;
 use syn::{parse2, DeriveInput};
+use syn::{Attribute, Result};
 
 // 入口函数，用于中间层接受Result
 pub fn entrypoint(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
@@ -33,7 +33,12 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
         let field_name = &field.ident;
         // 生成asker 方法
         let dialogue_list = DialoguerList::parse_field(field)?;
-        methods.extend(dialogue_list.generate_method(field_name));
+        let skip = get_skip(&field)?;
+
+        if !skip {
+            let method = dialogue_list.generate_method(field_name)?;
+            methods.extend(method);
+        }
 
         if let Some(ty) = get_inner_type(&field.ty, "Option") {
             asker_fields_init.extend(quote!(
@@ -105,16 +110,46 @@ fn get_theme(st: &DeriveInput) -> Result<i32> {
 
         if ident == "simple" {
             return Ok(0);
-        } else if ident == "colorful" {
+        }
+        if ident == "colorful" {
             return Ok(1);
-        } else if ident == "colorful_macro" {
+        }
+        if ident == "colorful_macro" {
             return Ok(2);
-        } else {
+        }
+        return Err(syn::Error::new_spanned(
+            ident,
+            "only support simple,colorful,colorful_macro",
+        ));
+    }
+    Ok(2)
+}
+
+fn get_skip(field: &syn::Field) -> Result<bool> {
+    let skip = field
+        .attrs
+        .iter()
+        .find(|attr| attr.path().is_ident("asker"));
+    let mut res = false;
+    if let Some(attr) = skip {
+        attr.parse_nested_meta(|meta| {
+            if meta.path.is_ident("skip") {
+                res = true;
+                return Ok(());
+            }
+            Err(meta.error("only support skip"))
+        })?;
+    }
+
+    if res {
+        if get_inner_type(&field.ty, "Option").is_none()
+            && get_inner_type(&field.ty, "Vec").is_none()
+        {
             return Err(syn::Error::new_spanned(
-                ident,
-                "only support simple,colorful,colorful_macro",
+                field.ty.clone(),
+                "asker(skip) can only be used on Option or Vec",
             ));
         }
     }
-    Ok(2)
+    Ok(res)
 }

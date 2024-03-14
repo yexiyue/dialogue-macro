@@ -3,6 +3,7 @@ mod input;
 mod multiselect;
 mod password;
 mod select;
+mod sub_asker;
 use crate::utils::get_inner_type;
 use syn::Result;
 
@@ -33,6 +34,7 @@ pub enum DialoguerList {
     Confirm(confirm::Confirm),
     Select(select::Select, syn::Type),
     MultiSelect(multiselect::MultiSelect, syn::Type),
+    SubAsker(sub_asker::SubAsker),
 }
 
 impl DialoguerList {
@@ -72,6 +74,9 @@ impl DialoguerList {
     }
 
     pub fn parse_field(field: &syn::Field) -> Result<Self> {
+        if let Some(sub_asker) = sub_asker::SubAsker::from(&field)? {
+            return Ok(Self::SubAsker(sub_asker));
+        }
         for attr in &field.attrs {
             if let Some(dialogue) = DialoguerList::get_dialogue(attr) {
                 match dialogue {
@@ -177,6 +182,7 @@ impl DialoguerList {
             Self::MultiSelect(multiselect, ty) => {
                 multiselect.generate_method(theme, field_name, Some(ty))
             }
+            Self::SubAsker(sub_asker) => Ok(sub_asker.generate_method(field_name)),
         }
     }
 }

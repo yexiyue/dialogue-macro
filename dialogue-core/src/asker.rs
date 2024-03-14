@@ -26,10 +26,10 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
     for field in fields {
         let field_name = &field.ident;
         // 生成asker 方法
-        let dialogue_list = DialoguerList::parse_field(field)?;
         let skip = get_skip(&field)?;
 
         if !skip {
+            let dialogue_list = DialoguerList::parse_field(field)?;
             let method = dialogue_list.generate_method(&theme, field_name)?;
             methods.extend(method);
         }
@@ -104,7 +104,11 @@ fn get_skip(field: &syn::Field) -> Result<bool> {
                 res = true;
                 return Ok(());
             }
-            Err(meta.error("only support skip"))
+            if meta.path.is_ident("SubAsker") {
+                res = false;
+                return Ok(());
+            }
+            Err(meta.error("expected `skip` or SubAsker`"))
         })?;
     }
 

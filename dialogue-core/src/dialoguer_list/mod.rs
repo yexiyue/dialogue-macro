@@ -3,8 +3,7 @@ mod input;
 mod multiselect;
 mod password;
 mod select;
-use crate::{utils::get_inner_type, DIALOGUE_THEME};
-use quote::quote;
+use crate::utils::get_inner_type;
 use syn::Result;
 
 trait ParseFieldAttr
@@ -22,19 +21,10 @@ where
 
     fn generate_method(
         &self,
+        theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
         inner_ty: Option<&syn::Type>,
     ) -> Result<proc_macro2::TokenStream>;
-    fn get_theme() -> Option<proc_macro2::TokenStream> {
-        match unsafe { DIALOGUE_THEME } {
-            0 => None,
-            1 => Some(quote!(
-                &dialogue_macro::dialoguer::theme::ColorfulTheme::default()
-            )),
-            2 => Some(quote!(&dialogue_macro::ColorfulTheme::default())),
-            _ => unreachable!(),
-        }
-    }
 }
 
 pub enum DialoguerList {
@@ -176,14 +166,17 @@ impl DialoguerList {
 
     pub fn generate_method(
         &self,
+        theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
     ) -> Result<proc_macro2::TokenStream> {
         match self {
-            Self::Input(input) => input.generate_method(field_name, None),
-            Self::Confirm(confirm) => confirm.generate_method(field_name, None),
-            Self::Password(password) => password.generate_method(field_name, None),
-            Self::Select(select, ty) => select.generate_method(field_name, Some(ty)),
-            Self::MultiSelect(multiselect, ty) => multiselect.generate_method(field_name, Some(ty)),
+            Self::Input(input) => input.generate_method(theme, field_name, None),
+            Self::Confirm(confirm) => confirm.generate_method(theme, field_name, None),
+            Self::Password(password) => password.generate_method(theme, field_name, None),
+            Self::Select(select, ty) => select.generate_method(theme, field_name, Some(ty)),
+            Self::MultiSelect(multiselect, ty) => {
+                multiselect.generate_method(theme, field_name, Some(ty))
+            }
         }
     }
 }

@@ -50,28 +50,23 @@ impl ParseFieldAttr for Input {
                 return Ok(());
             }
 
-            Err(meta.error("expected `prompt` or `default`"))
+            Err(meta.error("expected `prompt` , `default` , `with_default`"))
         })?;
         Ok(res)
     }
 
     fn generate_method(
         &self,
+        theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
         _inner_ty: Option<&syn::Type>,
     ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
         // 设置主题
-        if let Some(theme) = Self::get_theme() {
-            body.extend(quote! {
-                let res=dialogue_macro::dialoguer::Input::with_theme(#theme)
-            });
-        } else {
-            body.extend(quote! {
-                let res=dialogue_macro::dialoguer::Input::new()
-            });
-        }
+        body.extend(quote! {
+            let res=dialogue_macro::dialoguer::Input::with_theme(#theme)
+        });
         let Self {
             prompt,
             default,

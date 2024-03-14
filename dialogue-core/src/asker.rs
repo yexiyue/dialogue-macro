@@ -1,18 +1,12 @@
 use super::dialoguer_list::DialoguerList;
-use crate::{
-    utils::{get_fields, get_inner_type},
-    DIALOGUE_THEME,
-};
+use crate::utils::{get_fields, get_inner_type};
 use quote::quote;
-use syn::{parse2, DeriveInput};
-use syn::{Attribute, Result};
+use syn::{parse_str, LitStr, Result};
+use syn::{DeriveInput, Type};
 
 // 入口函数，用于中间层接受Result
 pub fn entrypoint(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
     let mut res = proc_macro2::TokenStream::new();
-    unsafe {
-        DIALOGUE_THEME = get_theme(st)?;
-    }
     res.extend(generate_asker(st)?);
     Ok(res)
 }
@@ -28,7 +22,7 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
 
     let asker_name = syn::Ident::new(&format!("{}Asker", st_name), st.ident.span());
     let mut methods = proc_macro2::TokenStream::new();
-
+    let theme = get_theme(st)?;
     for field in fields {
         let field_name = &field.ident;
         // 生成asker 方法
@@ -36,7 +30,7 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
         let skip = get_skip(&field)?;
 
         if !skip {
-            let method = dialogue_list.generate_method(field_name)?;
+            let method = dialogue_list.generate_method(&theme, field_name)?;
             methods.extend(method);
         }
 
@@ -98,33 +92,6 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
     })
 }
 
-// 获取主题信息
-fn get_theme(st: &DeriveInput) -> Result<i32> {
-    let theme = st.attrs.iter().find(|attr| attr.path().is_ident("theme"));
-    if let Some(syn::Attribute {
-        meta: syn::Meta::List(syn::MetaList { tokens, .. }),
-        ..
-    }) = theme
-    {
-        let ident: syn::Ident = parse2(tokens.clone())?;
-
-        if ident == "simple" {
-            return Ok(0);
-        }
-        if ident == "colorful" {
-            return Ok(1);
-        }
-        if ident == "colorful_macro" {
-            return Ok(2);
-        }
-        return Err(syn::Error::new_spanned(
-            ident,
-            "only support simple,colorful,colorful_macro",
-        ));
-    }
-    Ok(2)
-}
-
 fn get_skip(field: &syn::Field) -> Result<bool> {
     let skip = field
         .attrs
@@ -150,6 +117,25 @@ fn get_skip(field: &syn::Field) -> Result<bool> {
                 "asker(skip) can only be used on Option or Vec",
             ));
         }
+    }
+    Ok(res)
+}
+
+fn get_theme(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
+    let mut res = quote!();
+    if let Some(attr) = st.attrs.iter().find(|attr| attr.path().is_ident("asker")) {
+        attr.parse_nested_meta(|meta| {
+            if meta.path.is_ident("theme") {
+                meta.value()?;
+                let v = meta.input.parse::<LitStr>()?;
+                let path: Type = parse_str(&v.value())?;
+                res = quote!(&#path::default());
+                return Ok(());
+            }
+            return Err(meta.error("expect `theme`"));
+        })?;
+    } else {
+        res = quote!(&dialogue_macro::ColorfulTheme::default())
     }
     Ok(res)
 }

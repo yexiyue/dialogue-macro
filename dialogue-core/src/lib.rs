@@ -2,12 +2,12 @@
 该crate是dialogue-macro库的核心库，具体的用法请参考[dialogue-macro](https://docs.rs/dialogue-macro/latest/dialogue_macro/)
  */
 
-use dialoguer::entrypoint;
+use asker::entrypoint;
 use proc_macro::TokenStream;
-mod dialoguer;
+mod asker;
 pub(crate) mod dialoguer_list;
+mod enum_asker;
 mod utils;
-pub(crate) static mut DIALOGUE_THEME: i32 = 1;
 
 /**
 # Asker 属性宏
@@ -198,11 +198,19 @@ fn main() {
 
 #[proc_macro_derive(
     Asker,
-    attributes(input, confirm, password, select, multiselect, theme, asker)
+    attributes(input, confirm, password, select, multiselect, asker)
 )]
-pub fn dialoguer(input: TokenStream) -> TokenStream {
+pub fn asker(input: TokenStream) -> TokenStream {
     let st = syn::parse_macro_input!(input as syn::DeriveInput);
     entrypoint(&st)
+        .unwrap_or_else(|e| e.to_compile_error())
+        .into()
+}
+
+#[proc_macro_derive(EnumAsker, attributes(asker))]
+pub fn enum_asker(input: TokenStream) -> TokenStream {
+    let st = syn::parse_macro_input!(input as syn::DeriveInput);
+    enum_asker::enum_asker_build(st)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }

@@ -39,19 +39,18 @@ impl ParseFieldAttr for Password {
         Ok(res)
     }
 
-    fn generate_method(&self, field_name: &Option<syn::Ident>,_inner_ty: Option<&syn::Type>,) -> Result<proc_macro2::TokenStream> {
+    fn generate_method(
+        &self,
+        theme: &proc_macro2::TokenStream,
+        field_name: &Option<syn::Ident>,
+        _inner_ty: Option<&syn::Type>,
+    ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
 
-        if let Some(theme) = Self::get_theme() {
-            body.extend(quote! {
-                let res=dialogue_macro::dialoguer::Password::with_theme(#theme)
-            });
-        } else {
-            body.extend(quote! {
-                let res=dialogue_macro::dialoguer::Password::new()
-            });
-        }
+        body.extend(quote! {
+            let res=dialogue_macro::dialoguer::Password::with_theme(#theme)
+        });
 
         let Self {
             prompt,

@@ -88,8 +88,12 @@ fn main() {
  */
 
 mod theme;
-pub use dialogue_core::Asker;
+pub use dialogue_core::{Asker, EnumAsker};
 #[doc(hidden)]
 pub use dialoguer;
 #[doc(hidden)]
 pub use theme::ColorfulTheme;
+
+pub trait Build {
+    fn build() -> Self;
+}

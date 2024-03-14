@@ -4,6 +4,7 @@ use dialogue_core::EnumAsker;
 use dialogue_macro::{Asker, Build};
 
 #[derive(Debug, Asker)]
+#[asker(theme = "dialogue_macro::ColorfulTheme")]
 struct UserInput {
     username: String,
     is_student_status: bool,

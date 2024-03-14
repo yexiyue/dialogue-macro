@@ -2,7 +2,7 @@
 
 use dialogue_macro::Asker;
 #[derive(Debug, Asker)]
-#[theme(colorful_macro)]
+#[asker(theme = "dialogue_macro::ColorfulTheme")]
 struct User {
     name: String,
     age: u32,

@@ -4,3 +4,4 @@ translate.ignore.class.push("icon-button");
 translate.ignore.class.push("theme-popup");
 //进行翻译
 translate.execute();
+translate.request.listener.start();

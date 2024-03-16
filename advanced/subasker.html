@@ -1,0 +1,327 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>SubAsker - dialogue macro</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom/translate.css">
+
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../quickstart.html"><strong aria-hidden="true">2.</strong> QuickStart</a></li><li class="chapter-item expanded "><a href="../guide/index.html"><strong aria-hidden="true">3.</strong> Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../guide/input.html"><strong aria-hidden="true">3.1.</strong> Input</a></li><li class="chapter-item expanded "><a href="../guide/password.html"><strong aria-hidden="true">3.2.</strong> Password</a></li><li class="chapter-item expanded "><a href="../guide/confirm.html"><strong aria-hidden="true">3.3.</strong> Confirm</a></li><li class="chapter-item expanded "><a href="../guide/select.html"><strong aria-hidden="true">3.4.</strong> Select</a></li><li class="chapter-item expanded "><a href="../guide/multiselect.html"><strong aria-hidden="true">3.5.</strong> Multiselect</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced/index.html"><strong aria-hidden="true">4.</strong> Advanced</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced/enum.html"><strong aria-hidden="true">4.1.</strong> EnumAsker</a></li><li class="chapter-item expanded "><a href="../advanced/subasker.html" class="active"><strong aria-hidden="true">4.2.</strong> SubAsker</a></li><li class="chapter-item expanded "><a href="../advanced/theme.html"><strong aria-hidden="true">4.3.</strong> Theme</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title ignore">dialogue macro</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yexiyue/dialogue-macro" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        
+                        <span id="translate"></span>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="subasker"><a class="header" href="#subasker">SubAsker</a></h1>
+<p><code>SubAsker</code> 是 <code>dialogue_macro</code> 库中用于标记结构体字段的属性，它允许将一个已实现 <code>Build</code> 特质的结构体或枚举类型嵌入到另一个结构体中，并作为一个子询问器进行交互式数据收集。</p>
+<p>以下代码片段展示了如何在 <code>UserInput</code> 结构体中使用 <code>SubAsker</code> 属性：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Asker)]
+struct UserInput {
+    // 其他用户输入字段...
+
+    // 使用 SubAsker 标记字段以启用子询问器功能
+    #[asker(SubAsker)]
+    detailed_info: DetailedUserInfo,
+
+    // 同样使用 SubAsker 对枚举类型进行嵌套询问
+    #[asker(SubAsker)]
+    choice: EnumSelection,
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>重要提示：</strong></p>
+<p>为了确保 <code>SubAsker</code> 正常工作，被该属性修饰的字段所对应的结构体或枚举类型必须实现 <code>Build</code> 这个特质。这样，在调用这些字段时，会自动触发其内部的 <code>.build()</code> 方法，从而逐层展开并执行相应的命令行交互逻辑。例如，在上面的示例中，<code>DetailedUserInfo</code> 和 <code>EnumSelection</code> 都需要实现 <code>Build</code> 特质。</p>
+<h3 id="示例"><a class="header" href="#示例">示例</a></h3>
+<p>在本示例中，我们将展示如何通过 <code>dialogue_macro</code> 库中的 <code>SubAsker</code> 属性以及相关的 <code>Asker</code> 和 <code>Build</code> 特质来实现结构化的、层次分明的命令行用户交互流程。</p>
+<p>首先，我们定义了一个名为 <code>UserInput</code> 的结构体，并使用 <code>#[derive(Asker)]</code> 和 <code>#[asker(theme = "...")]</code> 宏对其进行装饰，以便于在命令行界面中进行信息收集。同时，结构体中包含两个字段：<code>detailed_info</code> 和 <code>choice</code>，它们都被标记为 <code>#[asker(SubAsker)]</code>，表示这两个字段将作为一个子询问器（SubAsker）来处理更深层次的用户输入。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use dialogue_macro::{Asker, Build, EnumAsker};
+
+#[derive(Debug, Asker)]
+#[asker(theme = "dialogue_macro::ColorfulTheme")]
+struct UserInput {
+    username: String,
+    is_student_status: bool,
+    educational_institution: String,
+
+    #[asker(SubAsker)]
+    detailed_info: DetailedUserInfo,
+    #[asker(SubAsker)]
+    choice: EnumSelection,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>接下来，我们定义了两个用于嵌套询问的类型：</p>
+<ol>
+<li><strong>DetailedUserInfo</strong> 结构体，其中包含了用户的电子邮件地址和年龄信息。这个结构体实现了 <code>Debug</code>、<code>Clone</code> 和 <code>Asker</code> 特质，并且为了配合 <code>SubAsker</code> 使用，还额外实现了 <code>Build</code> 特质。在 <code>impl Build for DetailedUserInfo</code> 中，我们定义了 <code>.build()</code> 方法以顺序获取用户邮箱地址和年龄。</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, Asker)]
+struct DetailedUserInfo {
+    email_address: String,
+    age: u8,
+}
+
+impl Build for DetailedUserInfo {
+    fn build() -&gt; Self {
+        Self::asker()
+            .email_address("请提供您的邮箱地址")
+            .age("请输入您的年龄")
+            .finish()
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<ol start="2">
+<li><strong>EnumSelection</strong> 枚举，它包含了三个选项（OptionD、OptionE、OptionF）。此枚举不仅实现了 <code>Debug</code> 和 <code>Clone</code> 特质，同时也派生了 <code>EnumAsker</code> 特质，这意味着它可以作为子询问器呈现给用户选择。</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, EnumAsker, Clone)]
+enum EnumSelection {
+    OptionD,
+    OptionE,
+    OptionF,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>最后，在主函数中，我们实例化了 <code>UserInput</code> 并依次调用各个字段对应的询问方法：</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let collected_user_input = UserInput::asker()
+        .username("请输入用户名")
+        .is_student_status("您是否是学生身份?")
+        .educational_institution("请输入您的学校名称")
+        // 调用 SubAsker 来收集详细的用户信息
+        .detailed_info()
+        // 调用另一个 SubAsker 来让用户从枚举选项中做出选择
+        .choice()
+        // 收集所有用户输入并结束询问过程
+        .finish();
+
+    println!("{:?}", collected_user_input);
+}</code></pre></pre>
+<p>通过这种方式，当运行程序时，用户将会按照结构化的层级顺序依次输入相关信息，从而实现复杂而有序的命令行交互体验。</p>
+<p><img src="subasker.assets/image-20240316161316179.png" alt="image-20240316161316179" /></p>
+<p><img src="subasker.assets/image-20240316161356463.png" alt="image-20240316161356463" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../advanced/enum.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../advanced/theme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../advanced/enum.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../advanced/theme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <script src="https://cdn.staticfile.net/translate.js/3.1.2/translate.js"></script>
+        <!-- Custom JS scripts -->
+        <script src="../theme/custom/main.js"></script>
+        
+
+    </div>
+    </body>
+</html>

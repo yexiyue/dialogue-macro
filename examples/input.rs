@@ -3,21 +3,20 @@ use dialogue_macro::Asker;
 
 #[derive(Asker, Debug)]
 struct User {
-    #[asker(skip)]
     name: Option<String>,
-    #[input(prompt = "Enter your email address: ", with_default = true)]
+    #[input(prompt = "请输入您的邮箱地址: ", with_default = true)]
     email: String,
-    #[input(default = 16,with_default = true)]
+    #[input(with_default = true)]
     age: u8,
-    #[input(prompt = "Enter your school: ", default = "清华大学")]
+    #[input(prompt = "请输入您的学校名称: ", default = "清华大学")]
     school: Option<String>,
 }
 
 fn main() {
     let user = User::asker()
-        // .name("Enter your name: ")
-        .email("yexiyue666@qq.com".into())
-        .age("Enter your age: ",17)
+        .name("请输入您的姓名: ")
+        .email("yexiyue666@qq.com".to_string())
+        .age("请输入您的年龄", 17)
         .school()
         .finish();
 

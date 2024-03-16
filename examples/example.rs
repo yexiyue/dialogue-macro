@@ -2,7 +2,7 @@
 use dialogue_core::Asker;
 
 #[derive(Asker, Debug)]
-// #[asker(theme = "dialogue_macro::dialoguer::theme::ColorfulTheme")]
+#[asker(theme = "dialogue_macro::dialoguer::theme::ColorfulTheme")]
 struct User {
     #[input(prompt = "Enter your name:")]
     name: String,

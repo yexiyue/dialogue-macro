@@ -1,0 +1,11 @@
+#translateSelectLanguage {
+  width: 100px;
+  outline: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+#translate {
+  display: inline-block;
+  width: 100px;
+}

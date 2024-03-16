@@ -1,7 +1,6 @@
 #![allow(unused)]
 
-use dialogue_core::EnumAsker;
-use dialogue_macro::{Asker, Build};
+use dialogue_macro::{Asker, Build, EnumAsker};
 
 #[derive(Debug, Asker)]
 #[asker(theme = "dialogue_macro::ColorfulTheme")]

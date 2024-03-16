@@ -1,83 +1,58 @@
-# dialogue-macro
+[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro) [![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro) [文档教程](https://yexiyue.github.io/dialogue-macro/)
 
-[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro) [![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro)
+`dialogue-macro` 是一款使用 Rust 语言设计的宏库，致力于无缝对接并增强 `dialoguer` 库的功能表现，采用声明式的编程模式简化命令行提示界面的构建流程。该库在实现结构化、层次化的用户交互体验上表现出色，尤其适应于命令行应用程序中各类复杂信息收集和配置选项设定的需求。
 
-dialogue-macro 是一个 Rust 宏封装库，它作为 [dialoguer](https://docs.rs/dialoguer/latest/dialoguer/) 的扩展，为命令行交互界面的构建提供了更为简洁和直观的方法。通过利用 `Asker` 宏的力量，开发者可以迅速搭建一系列用户友好且功能丰富的对话界面。
+**核心特性概览：**
 
-### 简介
+1. **结构体与枚举支持**：
+   dialogue-macro 允许开发者通过派生宏 (`#[derive(Asker)]` 和 `#[derive(EnumAsker)]`) 将自定义结构体及枚举类型转换为功能完备的命令行询问器，从而依据预定义的字段或枚举成员进行高效的数据采集。
 
-**dialogue-macro** 是一个 Rust 库，它通过宏的方式简化了对 <a href="https://docs.rs/dialoguer/latest/dialoguer/" target="_blank">dialoguer</a> 库的常用对话界面组件的使用，目前支持以下功能：
+2. **嵌套式交互逻辑**：
+   提供了对嵌套子询问器的支持，通过在结构体成员上标注 `#[asker(SubAsker)]` 属性，可实现多层次、递进式的用户交互过程，以应对不同场景下的深度信息获取需求。
 
-- [Password](https://docs.rs/dialoguer/latest/dialoguer/struct.Password.html)：密码输入
-- [Select](https://docs.rs/dialoguer/latest/dialoguer/struct.Select.html)：单选项选择
-- [MultiSelect](https://docs.rs/dialoguer/latest/dialoguer/struct.MultiSelect.html)：多选项选择
-- [Confirm](https://docs.rs/dialoguer/latest/dialoguer/struct.Confirm.html)：确认提示
-- [Input](https://docs.rs/dialoguer/latest/dialoguer/struct.Input.html)：普通文本输入
+3. **主题定制能力**：
+   支持主题设置，如示例中的 `dialogue_macro::ColorfulTheme`，使得开发者能够根据实际需要选择和应用不同的视觉风格，提升命令行提示界面的用户体验和可读性。
 
-### Asker 宏
 
-`Asker` 宏允许您定义一个结构体，并根据结构体中字段的类型自动生成对应类型的对话式用户输入方法。公共字段中的 `prompt` 注解可用于预设提示信息，在调用方法时若已设置则无需额外传递 prompt 参数。
 
-`Asker`宏具有智能类型推断功能，当未明确指定交互类型时，它会根据结构体字段的原始类型自动确定合适的对话交互方式：
+# 快速开始
 
-1. 当字段为 `bool` 或 `Option<bool>` 类型时，宏会将其识别并转化为 confirm 类型的用户确认提示。
-2. 若字段为 `Vec<T>` 类型，则宏将推断其为 multiselect 类型，以便进行多项选择操作。
-3. 对于所有其他非上述特殊类型的字段，默认处理方式是将其视为普通的文本输入，即 input 类型。
+首先通过cargo添加`dialogue-macro`依赖:
 
-`Asker`宏借鉴了 Builder 模式的设计理念，使对话流程的构建更加直观和灵活。
-
-### 示例
-
-```rust
-#![allow(unused)]
-use dialogue_core::Asker;
-
-#[derive(Asker, Debug)]
-#[theme(colorful)]
-struct User {
-    // 用户名输入
-    #[input(prompt = "Enter your name:")]
-    name: String,
-
-    // 年龄输入，可通过方法调用指定 prompt
-    age: u32,
-
-    // 密码输入
-    #[password(prompt = "Enter your password:")]
-    password: String,
-
-    // 可选邮箱输入
-    email: Option<String>,
-
-    // 单项选择
-    #[select(prompt="Please select your sex", options = ["Male", "Female", "Other"], default = 1)]
-    sex: String,
-
-    // 确认提示
-    #[confirm(prompt = "Are you sure?")]
-    sure: bool,
-
-    // 多项选择
-    #[multiselect(prompt = "Please select your favorite", default=[1])]
-    favorite: Vec<String>,
-}
-
-fn main() {
-    let favorite_options = vec!["eat".to_string(), "sleep".to_string(), "code".to_string()];
-
-    // 使用自动生成的方法构建用户输入流程
-    let user = User::asker()
-        .name()
-        .age("Enter your age:")
-        .email("Enter your email:")
-        .sex()
-        .favorite(&favorite_options)
-        .sure()
-        .finish();
-
-    println!("{:#?}", user);
-}
-
+```bash
+cargo add dialogue-macro
 ```
 
-**更多示例与详细文档请参考：**<a href="https://github.com/yexiyue/dialogue-macro" target="_blank">GitHub: dialogue-macro</a>
+然后在您的Rust代码中导入该crate:
+
+```rust
+use dialogue_macro::Asker;
+```
+
+接下来,使用`#[derive(Asker, Debug)]`宏来为需要交互式输入的结构体派生相关trait:
+
+```rust
+#[derive(Asker, Debug)]
+struct User {
+    #[input(prompt = "请输入您的名字:")]
+    name: String,
+    age: u32,
+}
+```
+
+`#[derive(Asker)]`会自动为结构体实现`asker()`构造器方法。对于带有`#[input(prompt = "...")]`属性的字段,您可以直接调用同名方法(无需再传入提示文本作为参数)。
+
+最后,使用派生的方法链式调用来获取用户输入:
+
+```rust
+fn main() {
+    let user = User::asker()
+        .name()
+        .age("请输入您的年龄:")
+        .finish();
+
+    println!("{:?}", user);
+}
+```
+
+

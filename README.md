@@ -1,4 +1,6 @@
-[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro) [![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro) [文档教程](https://yexiyue.github.io/dialogue-macro/)
+[![GitHub Stars](https://img.shields.io/github/stars/yexiyue/dialogue-macro?style=flat-square)](https://github.com/yexiyue/dialogue-macro) [![Crates.io](https://img.shields.io/crates/v/dialogue-macro?style=flat-square)](https://crates.io/crates/dialogue-macro) 
+
+[文档教程](https://yexiyue.github.io/dialogue-macro/)
 
 `dialogue-macro` 是一款使用 Rust 语言设计的宏库，致力于无缝对接并增强 `dialoguer` 库的功能表现，采用声明式的编程模式简化命令行提示界面的构建流程。该库在实现结构化、层次化的用户交互体验上表现出色，尤其适应于命令行应用程序中各类复杂信息收集和配置选项设定的需求。
 

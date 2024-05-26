@@ -1,13 +1,12 @@
 use super::ParseFieldAttr;
 use quote::quote;
-use syn::{ExprLit, Lit, Result};
+use syn::{ExprLit, Generics, Lit, Result};
 
 #[derive(Debug)]
 pub struct Input {
     pub prompt: Option<String>,
     pub default: Option<ExprLit>,
     pub with_default: bool,
-    inner_ty: syn::Type,
 }
 
 impl Default for Input {
@@ -16,18 +15,16 @@ impl Default for Input {
             prompt: None,
             default: None,
             with_default: false,
-            inner_ty: syn::parse_str("String").unwrap(),
         }
     }
 }
 
 impl ParseFieldAttr for Input {
-    fn parse_field_attr_with_inner_ty(attr: &syn::Attribute, inner_ty: &syn::Type) -> Result<Self> {
+    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
         let mut res = Self {
             prompt: None,
             default: None,
             with_default: false,
-            inner_ty: inner_ty.clone(),
         };
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("prompt") {
@@ -59,7 +56,7 @@ impl ParseFieldAttr for Input {
         &self,
         theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
-        _inner_ty: Option<&syn::Type>,
+        inner_ty: Option<&syn::Type>,
     ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
@@ -67,11 +64,11 @@ impl ParseFieldAttr for Input {
         body.extend(quote! {
             let res=dialogue_macro::dialoguer::Input::with_theme(#theme)
         });
+
         let Self {
             prompt,
             default,
             with_default,
-            inner_ty,
         } = self;
 
         if self.prompt.is_some() {
@@ -101,18 +98,33 @@ impl ParseFieldAttr for Input {
                 ))
             }
         }
+        // 使用范型处理input 默认值
+        let mut generate = Generics::default();
 
         if *with_default {
+            generate.params.push(syn::parse_quote!(T));
+            generate.make_where_clause();
+            generate
+                .where_clause
+                .as_mut()
+                .unwrap()
+                .predicates
+                .push(syn::parse_quote!(T:Into<#inner_ty> + std::clone::Clone + std::fmt::Display));
+
             params.extend(quote! {
-                default: #inner_ty,
+                default: T,
             });
+
             body.extend(quote!(
-                .default(default)
+                .default(default.into())
             ))
         }
-
+        let (_, type_g, where_g) = generate.split_for_impl();
         Ok(quote! {
-            pub fn #field_name(&mut self,#params) -> &mut Self{
+
+            pub fn #field_name #type_g(&mut self,#params) -> &mut Self
+                #where_g
+            {
                 #body.interact().unwrap();
                 self.#field_name=Some(res);
                 self

@@ -11,14 +11,7 @@ trait ParseFieldAttr
 where
     Self: Sized,
 {
-    #[allow(unused)]
-    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
-        unimplemented!()
-    }
-    #[allow(unused)]
-    fn parse_field_attr_with_inner_ty(attr: &syn::Attribute, inner_ty: &syn::Type) -> Result<Self> {
-        unimplemented!()
-    }
+    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self>;
 
     fn generate_method(
         &self,
@@ -28,16 +21,16 @@ where
     ) -> Result<proc_macro2::TokenStream>;
 }
 
-pub enum DialoguerList {
-    Input(input::Input),
+pub enum DialoguerList<'a> {
+    Input(input::Input, Option<&'a syn::Type>),
     Password(password::Password),
-    Confirm(confirm::Confirm),
-    Select(select::Select, syn::Type),
-    MultiSelect(multiselect::MultiSelect, syn::Type),
+    Confirm(confirm::Confirm, Option<&'a syn::Type>),
+    Select(select::Select, &'a syn::Type),
+    MultiSelect(multiselect::MultiSelect, &'a syn::Type),
     SubAsker(sub_asker::SubAsker),
 }
 
-impl DialoguerList {
+impl<'a> DialoguerList<'a> {
     fn get_dialogue(attr: &syn::Attribute) -> Option<&'static str> {
         if attr.path().is_ident("input") {
             return Some("Input");
@@ -73,7 +66,7 @@ impl DialoguerList {
         false
     }
 
-    pub fn parse_field(field: &syn::Field) -> Result<Self> {
+    pub fn parse_field(field: &'a syn::Field) -> Result<Self> {
         if let Some(sub_asker) = sub_asker::SubAsker::from(&field)? {
             return Ok(Self::SubAsker(sub_asker));
         }
@@ -82,7 +75,8 @@ impl DialoguerList {
                 match dialogue {
                     "Input" => {
                         return Ok(DialoguerList::Input(
-                            input::Input::parse_field_attr_with_inner_ty(attr, &field.ty)?,
+                            input::Input::parse_field_attr(attr)?,
+                            Some(get_inner_type(&field.ty, "Option").unwrap_or(&field.ty)),
                         ));
                     }
                     "Password" => {
@@ -98,9 +92,10 @@ impl DialoguerList {
                     }
                     "Confirm" => {
                         if Self::is_some_type(&field.ty, "bool", "Option") {
-                            return Ok(DialoguerList::Confirm(confirm::Confirm::parse_field_attr(
-                                attr,
-                            )?));
+                            return Ok(DialoguerList::Confirm(
+                                confirm::Confirm::parse_field_attr(attr)?,
+                                get_inner_type(&field.ty, "Option"),
+                            ));
                         }
                         return Err(syn::Error::new_spanned(
                             &field.ty,
@@ -111,19 +106,19 @@ impl DialoguerList {
                         if let Some(ty) = get_inner_type(&field.ty, "Option") {
                             return Ok(DialoguerList::Select(
                                 select::Select::parse_field_attr(attr)?,
-                                ty.clone(),
+                                ty,
                             ));
                         }
                         return Ok(DialoguerList::Select(
                             select::Select::parse_field_attr(attr)?,
-                            field.ty.clone(),
+                            &field.ty,
                         ));
                     }
                     "MultiSelect" => {
                         if let Some(ty) = get_inner_type(&field.ty, "Vec") {
                             return Ok(DialoguerList::MultiSelect(
                                 multiselect::MultiSelect::parse_field_attr(attr)?,
-                                ty.clone(),
+                                ty,
                             ));
                         }
                         return Err(syn::Error::new_spanned(
@@ -139,7 +134,7 @@ impl DialoguerList {
                     if path.is_ident("Vec") {
                         return Ok(DialoguerList::MultiSelect(
                             multiselect::MultiSelect::parse_field_attr(attr)?,
-                            get_inner_type(&field.ty, "Vec").unwrap().clone(),
+                            get_inner_type(&field.ty, "Vec").unwrap(),
                         ));
                     }
                     return Err(syn::Error::new_spanned(
@@ -158,13 +153,19 @@ impl DialoguerList {
         if let Some(ty) = get_inner_type(&field.ty, "Vec") {
             Ok(DialoguerList::MultiSelect(
                 multiselect::MultiSelect::default(),
-                ty.clone(),
+                ty,
             ))
         } else {
             if Self::is_some_type(&field.ty, "bool", "Option") {
-                Ok(DialoguerList::Confirm(confirm::Confirm::default()))
+                Ok(DialoguerList::Confirm(
+                    confirm::Confirm::default(),
+                    get_inner_type(&field.ty, "Option"),
+                ))
             } else {
-                Ok(DialoguerList::Input(input::Input::default()))
+                Ok(DialoguerList::Input(
+                    input::Input::default(),
+                    Some(get_inner_type(&field.ty, "Option").unwrap_or(&field.ty)),
+                ))
             }
         }
     }
@@ -175,8 +176,8 @@ impl DialoguerList {
         field_name: &Option<syn::Ident>,
     ) -> Result<proc_macro2::TokenStream> {
         match self {
-            Self::Input(input) => input.generate_method(theme, field_name, None),
-            Self::Confirm(confirm) => confirm.generate_method(theme, field_name, None),
+            Self::Input(input, ty) => input.generate_method(theme, field_name, ty.clone()),
+            Self::Confirm(confirm, ty) => confirm.generate_method(theme, field_name, ty.clone()),
             Self::Password(password) => password.generate_method(theme, field_name, None),
             Self::Select(select, ty) => select.generate_method(theme, field_name, Some(ty)),
             Self::MultiSelect(multiselect, ty) => {

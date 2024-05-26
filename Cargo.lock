@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "dialogue-core"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "dialogue-macro"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "dialogue-core",
  "dialoguer",

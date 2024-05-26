@@ -8,16 +8,16 @@ struct User {
     email: String,
     #[input(with_default = true)]
     age: u8,
-    #[input(prompt = "请输入您的学校名称: ", default = "清华大学")]
+    #[input(prompt = "请输入您的学校名称: ", with_default = true)]
     school: Option<String>,
 }
 
 fn main() {
     let user = User::asker()
         .name("请输入您的姓名: ")
-        .email("yexiyue666@qq.com".to_string())
+        .email("yexiyue666@qq.com")
         .age("请输入您的年龄", 17)
-        .school()
+        .school("北京大学")
         .finish();
 
     println!("{:?}", user);

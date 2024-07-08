@@ -1,8 +1,8 @@
 use super::dialoguer_list::DialoguerList;
-use crate::utils::{get_fields, get_inner_type};
+use crate::utils::{ get_fields, get_inner_type };
 use quote::quote;
-use syn::{parse_str, LitStr, Result};
-use syn::{DeriveInput, Type};
+use syn::{ parse_str, LitStr, Result };
+use syn::{ DeriveInput, Type };
 
 // 入口函数，用于中间层接受Result
 pub fn entrypoint(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
@@ -26,7 +26,7 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
     for field in fields {
         let field_name = &field.ident;
         // 生成asker 方法
-        let skip = get_skip(&field)?;
+        let skip = get_skip(field)?;
 
         if !skip {
             let dialogue_list = DialoguerList::parse_field(field)?;
@@ -35,40 +35,59 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
         }
 
         if let Some(ty) = get_inner_type(&field.ty, "Option") {
-            asker_fields_init.extend(quote!(
+            asker_fields_init.extend(
+                quote!(
                 #field_name:std::option::Option::None,
-            ));
-            asker_fields.extend(quote!(
+            )
+            );
+            asker_fields.extend(
+                quote!(
                 #field_name:std::option::Option<#ty>,
-            ));
-            finish_clone_fields.extend(quote!(
+            )
+            );
+            finish_clone_fields.extend(
+                quote!(
                 #field_name:self.#field_name.clone(),
-            ));
+            )
+            );
         } else if let Some(ty) = get_inner_type(&field.ty, "Vec") {
-            asker_fields_init.extend(quote!(
+            asker_fields_init.extend(
+                quote!(
                 #field_name:std::vec::Vec::new(),
-            ));
-            asker_fields.extend(quote!(
+            )
+            );
+            asker_fields.extend(
+                quote!(
                 #field_name:std::vec::Vec<#ty>,
-            ));
-            finish_clone_fields.extend(quote!(
+            )
+            );
+            finish_clone_fields.extend(
+                quote!(
                 #field_name:self.#field_name.clone(),
-            ));
+            )
+            );
         } else {
             let ty = &field.ty;
-            asker_fields_init.extend(quote!(
+            asker_fields_init.extend(
+                quote!(
                 #field_name:std::option::Option::None,
-            ));
-            asker_fields.extend(quote!(
+            )
+            );
+            asker_fields.extend(
+                quote!(
                 #field_name:std::option::Option<#ty>,
-            ));
-            finish_clone_fields.extend(quote!(
+            )
+            );
+            finish_clone_fields.extend(
+                quote!(
                 #field_name:self.#field_name.clone().expect(&format!("{} is not set",stringify!(#field_name))),
-            ));
+            )
+            );
         }
     }
     let st_name = &st.ident;
-    Ok(quote! {
+    Ok(
+        quote! {
         impl #st_name{
             pub fn asker()-> #asker_name{
                 #asker_name{
@@ -89,14 +108,12 @@ fn generate_asker(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
 
             #methods
         }
-    })
+    }
+    )
 }
 
 fn get_skip(field: &syn::Field) -> Result<bool> {
-    let skip = field
-        .attrs
-        .iter()
-        .find(|attr| attr.path().is_ident("asker"));
+    let skip = field.attrs.iter().find(|attr| attr.path().is_ident("asker"));
     let mut res = false;
     if let Some(attr) = skip {
         attr.parse_nested_meta(|meta| {
@@ -112,16 +129,19 @@ fn get_skip(field: &syn::Field) -> Result<bool> {
         })?;
     }
 
-    if res {
-        if get_inner_type(&field.ty, "Option").is_none()
-            && get_inner_type(&field.ty, "Vec").is_none()
-        {
-            return Err(syn::Error::new_spanned(
+    if
+        res &&
+        get_inner_type(&field.ty, "Option").is_none() &&
+        get_inner_type(&field.ty, "Vec").is_none()
+    {
+        return Err(
+            syn::Error::new_spanned(
                 field.ty.clone(),
-                "asker(skip) can only be used on Option or Vec",
-            ));
-        }
+                "asker(skip) can only be used on Option or Vec"
+            )
+        );
     }
+
     Ok(res)
 }
 
@@ -136,10 +156,10 @@ fn get_theme(st: &DeriveInput) -> Result<proc_macro2::TokenStream> {
                 res = quote!(&#path::default());
                 return Ok(());
             }
-            return Err(meta.error("expect `theme`"));
+            Err(meta.error("expect `theme`"))
         })?;
     } else {
-        res = quote!(&dialogue_macro::ColorfulTheme::default())
+        res = quote!(&dialogue_macro::ColorfulTheme::default());
     }
     Ok(res)
 }

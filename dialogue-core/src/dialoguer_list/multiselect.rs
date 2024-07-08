@@ -1,6 +1,6 @@
 use super::ParseFieldAttr;
 use quote::quote;
-use syn::{parse::Parse, punctuated::Punctuated, token::Comma, ExprArray, LitInt, Result};
+use syn::{ parse::Parse, punctuated::Punctuated, token::Comma, ExprArray, LitInt, Result };
 
 #[derive(Debug, Default)]
 pub struct MultiSelect {
@@ -11,7 +11,7 @@ pub struct MultiSelect {
 }
 
 impl ParseFieldAttr for MultiSelect {
-    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
+    fn parse_field_attr(attr: &syn::Attribute, _inner_ty: Option<&syn::Type>) -> Result<Self> {
         let mut res = Self {
             prompt: None,
             default: None,
@@ -57,34 +57,31 @@ impl ParseFieldAttr for MultiSelect {
         &self,
         theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
-        inner_ty: Option<&syn::Type>,
+        inner_ty: Option<&syn::Type>
     ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
         let mut gen_options = proc_macro2::TokenStream::new();
         let mut gen_default = proc_macro2::TokenStream::new();
         // 设置主题
-        body.extend(quote! {
+        body.extend(
+            quote! {
             let res=dialogue_macro::dialoguer::MultiSelect::with_theme(#theme)
-        });
-        let Self {
-            prompt,
-            default,
-            options,
-            with_default,
-        } = self;
+        }
+        );
+        let Self { prompt, default, options, with_default } = self;
 
         if self.prompt.is_some() {
             body.extend(quote!(
                 .with_prompt(#prompt)
-            ))
+            ));
         } else {
             params.extend(quote! {
                 prompt: &str,
             });
             body.extend(quote!(
                 .with_prompt(prompt)
-            ))
+            ));
         }
 
         if options.is_some() {
@@ -101,16 +98,18 @@ impl ParseFieldAttr for MultiSelect {
         ));
 
         if default.is_some() {
-            gen_default.extend(quote!(
+            gen_default.extend(
+                quote!(
                 let mut default=vec![false;options.len()];
                 let temp=vec![#default];
                 for i in 0..temp.len(){
                     default[temp[i]]=true;
                 }
-            ));
+            )
+            );
             body.extend(quote!(
                 .defaults(&default)
-            ))
+            ));
         }
 
         if *with_default {
@@ -119,10 +118,11 @@ impl ParseFieldAttr for MultiSelect {
             });
             body.extend(quote!(
                 .defaults(&defaults)
-            ))
+            ));
         }
 
-        Ok(quote! {
+        Ok(
+            quote! {
             pub fn #field_name(&mut self,#params) -> &mut Self{
                 #gen_options
                 #gen_default
@@ -131,6 +131,7 @@ impl ParseFieldAttr for MultiSelect {
                 self.#field_name=res;
                 self
             }
-        })
+        }
+        )
     }
 }

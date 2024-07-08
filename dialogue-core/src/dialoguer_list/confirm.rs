@@ -10,7 +10,7 @@ pub struct Confirm {
 }
 
 impl ParseFieldAttr for Confirm {
-    fn parse_field_attr(attr: &syn::Attribute) -> Result<Self> {
+    fn parse_field_attr(attr: &syn::Attribute, _inner_ty: Option<&syn::Type>) -> Result<Self> {
         let mut res = Self {
             prompt: None,
             default: None,
@@ -46,35 +46,33 @@ impl ParseFieldAttr for Confirm {
         &self,
         theme: &proc_macro2::TokenStream,
         field_name: &Option<syn::Ident>,
-        _inner_ty: Option<&syn::Type>,
+        _inner_ty: Option<&syn::Type>
     ) -> Result<proc_macro2::TokenStream> {
         let mut body = proc_macro2::TokenStream::new();
         let mut params = proc_macro2::TokenStream::new();
-        body.extend(quote! {
+        body.extend(
+            quote! {
             let res=dialogue_macro::dialoguer::Confirm::with_theme(#theme)
-        });
-        let Self {
-            prompt,
-            default,
-            with_default,
-        } = self;
+        }
+        );
+        let Self { prompt, default, with_default } = self;
         if self.prompt.is_some() {
             body.extend(quote!(
                 .with_prompt(#prompt)
-            ))
+            ));
         } else {
             params.extend(quote! {
                 prompt: &str,
             });
             body.extend(quote!(
                 .with_prompt(prompt)
-            ))
+            ));
         }
 
         if default.is_some() {
             body.extend(quote!(
                 .default(#default)
-            ))
+            ));
         }
 
         if *with_default {
@@ -83,15 +81,17 @@ impl ParseFieldAttr for Confirm {
             });
             body.extend(quote!(
                 .default(default)
-            ))
+            ));
         }
 
-        Ok(quote! {
+        Ok(
+            quote! {
             pub fn #field_name(&mut self,#params) -> &mut Self{
                 #body.interact().unwrap();
                 self.#field_name=Some(res);
                 self
             }
-        })
+        }
+        )
     }
 }

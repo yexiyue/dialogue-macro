@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_str, DeriveInput, Fields, Ident, LitStr, Result, Type, Variant};
+use syn::{ parse_str, DeriveInput, Fields, Ident, LitStr, Result, Type, Variant };
 #[derive(Debug)]
 struct EnumVariant {
     label: Option<String>,
@@ -18,7 +18,7 @@ impl EnumVariant {
                     self.label = Some(v.value());
                     return Ok(());
                 }
-                return Err(meta.error("expected `label`"));
+                Err(meta.error("expected `label`"))
             })?;
         }
         Ok(())
@@ -29,10 +29,9 @@ impl EnumVariant {
         let mut types = vec![];
         match &st.fields {
             Fields::Named(_) => {
-                return Err(syn::Error::new(
-                    ident.span(),
-                    "asker don't supports enums with named fields",
-                ))
+                return Err(
+                    syn::Error::new(ident.span(), "asker don't supports enums with named fields")
+                );
             }
             Fields::Unnamed(_) => {
                 for field in &st.fields {
@@ -40,7 +39,7 @@ impl EnumVariant {
                 }
             }
             _ => {}
-        };
+        }
         let mut res = Self {
             label: None,
             ident,
@@ -83,7 +82,7 @@ impl EnumAsker {
                     self.theme = Some(path);
                     return Ok(());
                 }
-                return Err(meta.error("expected `prompt` , `default` , `theme`"));
+                Err(meta.error("expected `prompt` , `default` , `theme`"))
             })?;
         }
         Ok(())
@@ -105,18 +104,14 @@ impl EnumAsker {
                 }
             }
             _ => {
-                return Err(syn::Error::new(
-                    st.ident.span(),
-                    "EnumAsker only supports enums",
-                ))
+                return Err(syn::Error::new(st.ident.span(), "EnumAsker only supports enums"));
             }
         }
         Ok(res)
     }
 
     fn options(&self) -> proc_macro2::TokenStream {
-        let options = self
-            .variants
+        let options = self.variants
             .iter()
             .map(|i| i.ident.to_string())
             .collect::<Vec<_>>();
@@ -129,7 +124,7 @@ impl EnumAsker {
             let pat = i.ident.to_string();
             let types = &i.types;
             let ident = &i.ident;
-            let arm = if types.len() == 0 {
+            let arm = if types.is_empty() {
                 quote!(#pat => Self::#ident,)
             } else {
                 quote!(#pat => Self::#ident(#(#types::build()),*),)
@@ -143,23 +138,25 @@ impl EnumAsker {
     fn default_index(&self) -> Option<proc_macro2::TokenStream> {
         if self.default.is_some() {
             let default = self.default.as_ref().unwrap();
-            return Some(quote! {
+            return Some(
+                quote! {
                 let default_index = options
                     .iter()
                     .position(|i| *i == #default)
                     .expect(&format!("{} not found in options", #default));
-            });
+            }
+            );
         }
         None
     }
 
     fn selected(&self) -> proc_macro2::TokenStream {
-        let mut res = quote!( let i = dialoguer::Select::with_theme);
+        let mut res = quote!(let i = dialoguer::Select::with_theme);
         if self.theme.is_some() {
             let theme = self.theme.as_ref().unwrap();
             res.extend(quote!((&#theme::default())));
         } else {
-            res.extend(quote!((&dialogue_macro::ColorfulTheme::default())))
+            res.extend(quote!((&dialogue_macro::ColorfulTheme::default())));
         }
 
         if self.prompt.is_some() {
@@ -189,7 +186,8 @@ pub fn enum_asker_build(st: DeriveInput) -> Result<TokenStream> {
     let selected = asker.selected();
     let ident = st.ident;
 
-    let res = quote!(
+    let res =
+        quote!(
         impl dialogue_macro::Build for #ident {
             fn build() -> Self {
                 #options

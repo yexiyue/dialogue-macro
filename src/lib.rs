@@ -1,3 +1,4 @@
+#![allow(clippy::needless_doctest_main)]
 /*!
 
 # dialogue-macro
@@ -62,7 +63,7 @@ fn main() {
  */
 
 mod theme;
-pub use dialogue_core::{Asker, EnumAsker};
+pub use dialogue_core::{ Asker, EnumAsker };
 #[doc(hidden)]
 pub use dialoguer;
 #[doc(hidden)]

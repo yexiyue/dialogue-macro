@@ -8,7 +8,13 @@ struct User {
     email: String,
     #[input(with_default = true)]
     age: u8,
-    #[input(prompt = "请输入您的学校名称: ", with_default = true)]
+    #[input(
+        prompt = "请输入您的学校名称: ",
+        with_default = true,
+        validate_with = |input| {
+            if input.contains("大学") { Ok(()) } else { Err("学校名称必须包含大学") }
+        }
+    )]
     school: Option<String>,
 }
 

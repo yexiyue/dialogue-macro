@@ -1,7 +1,7 @@
 /*!
 该crate是dialogue-macro库的核心库，具体的用法请参考[dialogue-macro](https://docs.rs/dialogue-macro/latest/dialogue_macro/)
  */
-
+#![allow(clippy::needless_doctest_main)]
 use asker::entrypoint;
 use proc_macro::TokenStream;
 mod asker;
@@ -51,6 +51,7 @@ fn main() {
 
     println!("{:?}", user);
 }
+
 ```
 
 ### Confirm
@@ -73,6 +74,7 @@ fn main() {
     let user = User::asker().boy("您是男孩吗？").student().finish();
     println!("{:?}", user);
 }
+
 ```
 ### Password
 `password`属性宏用于创建密码输入框，可以设置`prompt`属性来定义初始密码输入提示，`confirmation`属性用来设置再次确认密码的提示，以及在两次输入不一致时显示的`mismatch`提示信息。
@@ -190,10 +192,7 @@ fn main() {
 ```
  */
 
-#[proc_macro_derive(
-    Asker,
-    attributes(input, confirm, password, select, multiselect, asker)
-)]
+#[proc_macro_derive(Asker, attributes(input, confirm, password, select, multiselect, asker))]
 pub fn asker(input: TokenStream) -> TokenStream {
     let st = syn::parse_macro_input!(input as syn::DeriveInput);
     entrypoint(&st)
@@ -341,7 +340,7 @@ impl Build for Student {
 #[asker(
     prompt = "Select registration type",
     default = "Student",
-  	theme = "dialoguer::theme::ColorfulTheme"
+    theme = "dialoguer::theme::ColorfulTheme"
 )]
 enum Register {
     // 普通用户注册选项
@@ -385,7 +384,8 @@ fn main() {
 #[proc_macro_derive(EnumAsker, attributes(asker))]
 pub fn enum_asker(input: TokenStream) -> TokenStream {
     let st = syn::parse_macro_input!(input as syn::DeriveInput);
-    enum_asker::enum_asker_build(st)
+    enum_asker
+        ::enum_asker_build(st)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }

@@ -9,15 +9,12 @@ Password
 
 `Password`不支持`default`和`with_default`参数。
 
-
-
 #### 配置选项
 
 - **prompt**: 指定提示用户输入密码的文本内容。
 - **confirmation**: 指定提示用户再次确认密码的文本内容。
 - **mismatch**: 当用户两次输入的密码不匹配时显示的错误信息。
-
-
+- **validate_with**: 指定验证函数，验证用户输入的值是否符合要求。
 
 #### 示例
 
@@ -28,27 +25,31 @@ use dialogue_macro::Asker;
 #[derive(Asker, Debug)]
 struct User {
     // 普通密码输入字段，用户可选择是否输入密码
-    #[password()]
+    #[password(
+        validate_with = |input| {
+            if input.len() < 6 {
+                return Err("密码长度不能小于6");
+            }
+            Ok(())
+        }
+    )]
     password: Option<String>,
 
     // 带确认和错误提示的密码输入字段
     #[password(
-        prompt = "输入密码:",
-        confirmation = "再次输入密码:",
+        prompt = "输入密码(测试2):",
+        confirmation = "再次输入密码(测试2):",
         mismatch = "两次输入的密码不匹配"
     )]
     password2: String,
 }
 
 fn main() {
-
-    let user = User::asker()
-        .password2()
-        .password("输入密码:")
-        .finish();
+    let user = User::asker().password("输入密码:").password2().finish();
 
     println!("{:?}", user);
 }
+
 ```
 
 ![image-20240316142937549](password.assets/image-20240316142937549.png)

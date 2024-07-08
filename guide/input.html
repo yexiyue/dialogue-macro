@@ -194,6 +194,7 @@
 <li><strong>prompt</strong>: 指定提示用户输入信息的文本内容。</li>
 <li><strong>default</strong>: 设置字段的默认值，在询问用户时显示该默认值供参考或直接采用。</li>
 <li><strong>with_default</strong>: 布尔值参数，当设为<code>true</code>时，在调用相应方法时需要传递默认值。</li>
+<li><strong>validate_with</strong>: 指定验证函数，验证用户输入的值是否符合要求。</li>
 </ul>
 <h4 id="示例"><a class="header" href="#示例">示例</a></h4>
 <p>在以下的 Rust 代码示例中，我们利用 <code>dialogue_macro</code> 库来实现一个用户交互式信息收集的场景。定义了一个结构体 <code>User</code>，它包含四个字段：<code>name</code>、<code>email</code>、<code>age</code> 和 <code>school</code>，分别用于收集用户的姓名、电子邮件地址、年龄和学校信息。</p>
@@ -207,21 +208,27 @@ struct User {
     email: String,
     #[input(with_default = true)]
     age: u8,
-    #[input(prompt = "请输入您的学校名称: ", default = "清华大学")]
+    #[input(
+        prompt = "请输入您的学校名称: ",
+        with_default = true,
+        validate_with = |input| {
+            if input.contains("大学") { Ok(()) } else { Err("学校名称必须包含大学") }
+        }
+    )]
     school: Option&lt;String&gt;,
 }
 
 fn main() {
-
     let user = User::asker()
         .name("请输入您的姓名: ")
-        .email("yexiyue666@qq.com".to_string())
+        .email("yexiyue666@qq.com")
         .age("请输入您的年龄", 17)
-        .school()
+        .school("北京大学")
         .finish();
 
     println!("{:?}", user);
-}</code></pre></pre>
+}
+</code></pre></pre>
 <p><img src="input.assets/image-20240316141307176.png" alt="image-20240316141307176" /></p>
 <p>在上述示例中：</p>
 <ul>
